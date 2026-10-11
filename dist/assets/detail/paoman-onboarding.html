@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>道具库原型3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#1a1a2e;color:#fff;min-height:100vh}
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+
+/* ========== 页面1：资产确认 ========== */
+.p1-topnav{display:flex;align-items:center;padding:12px 20px;background:#16162a;border-bottom:1px solid #2a2a4a}
+.p1-close{width:32px;height:32px;border-radius:50%;border:1px solid #444;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-right:20px}
+.p1-steps{display:flex;gap:24px;flex:1}
+.p1-step{display:flex;align-items:center;gap:6px;color:#666;font-size:14px}
+.p1-step .num{width:20px;height:20px;border-radius:50%;border:1px solid #666;display:flex;align-items:center;justify-content:center;font-size:12px}
+.p1-step.active{color:#4ecdc4}
+.p1-step.active .num{border-color:#4ecdc4;background:#4ecdc4;color:#000}
+.p1-topright{display:flex;align-items:center;gap:16px;margin-left:auto}
+.p1-topright .balance{color:#999;font-size:13px}
+.p1-topright .coins{color:#f0c040;font-size:13px}
+.p1-nav-btn{background:transparent;border:1px solid #4ecdc4;color:#4ecdc4;padding:6px 20px;border-radius:4px;cursor:pointer;font-size:13px}
+.p1-main{display:flex;min-height:calc(100vh - 57px)}
+.p1-sidebar{width:50px;background:#12122a;border-right:1px solid #2a2a4a;padding-top:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.p1-sidebar-label{writing-mode:vertical-lr;font-size:12px;color:#999;letter-spacing:2px}
+.p1-sidebar-num{width:28px;height:28px;border-radius:50%;border:1px solid #4ecdc4;color:#4ecdc4;display:flex;align-items:center;justify-content:center;font-size:13px}
+.p1-content{flex:1;padding:20px 28px}
+.p1-infobar{background:#1e1e3a;border-radius:8px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.p1-infobar-left h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.p1-infobar-left p{font-size:12px;color:#888}
+.p1-infobar-right{display:flex;align-items:center;gap:12px}
+.p1-model-select{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:8px 14px;color:#fff;font-size:13px;cursor:pointer}
+.p1-model-select .coin{color:#f0c040;font-size:12px}
+.p1-generate-btn{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;border:none;padding:10px 24px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+.p1-tabs{display:flex;gap:20px;margin-bottom:20px;align-items:center}
+.p1-tab{font-size:15px;color:#888;cursor:pointer;padding-bottom:8px;border-bottom:2px solid transparent}
+.p1-tab.active{color:#4ecdc4;border-bottom-color:#4ecdc4}
+.p1-tab-right{margin-left:auto}
+.p1-role-btn{background:transparent;border:1px solid #555;color:#ccc;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:13px}
+.p1-cards{display:flex;gap:16px;flex-wrap:wrap}
+.p1-card{width:200px;height:180px;border-radius:8px;overflow:visible;position:relative;cursor:pointer;border:2px solid transparent;transition:border-color .2s}
+.p1-card:hover{border-color:#4ecdc4}.p1-card.selected{border-color:#4ecdc4}
+.p1-card .card-img{width:100%;height:100%;border-radius:6px;overflow:hidden}
+.p1-card .card-img img{width:100%;height:100%;object-fit:cover}
+.p1-card .label{position:absolute;top:8px;left:8px;font-size:13px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.p1-card .card-bottom{position:absolute;bottom:0;left:0;right:0;padding:6px 8px;background:linear-gradient(transparent,rgba(0,0,0,.85));border-radius:0 0 6px 6px;display:flex;align-items:center;gap:4px}
+.p1-card .cb-btn{background:rgba(255,255,255,.12);border:none;color:#ccc;font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;position:relative}
+.p1-card .cb-btn:hover{background:rgba(78,205,196,.3);color:#fff}
+.p1-switch-dd{position:absolute;bottom:100%;left:0;margin-bottom:4px;background:#2a2a3a;border-radius:6px;padding:4px 0;min-width:110px;box-shadow:0 4px 16px rgba(0,0,0,.5);z-index:30;display:none}
+.p1-switch-dd.show{display:block}
+.p1-switch-dd .sd-item{padding:8px 14px;font-size:12px;color:#ccc;cursor:pointer;white-space:nowrap}
+.p1-switch-dd .sd-item:hover{background:#3a3a5a;color:#fff}
+.p1-add-card{width:200px;height:180px;border-radius:8px;border:1px dashed #444;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:#888;font-size:13px;position:relative}
+.p1-add-card:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p1-add-card .plus{font-size:24px}
+.p1-add-dd{position:absolute;top:100%;left:0;margin-top:6px;background:#2a2a3a;border-radius:8px;padding:6px 0;min-width:160px;box-shadow:0 4px 20px rgba(0,0,0,.5);z-index:20;display:none}
+.p1-add-dd.show{display:block}
+.p1-add-dd .add-item{padding:10px 18px;font-size:13px;color:#ccc;cursor:pointer;white-space:nowrap}
+.p1-add-dd .add-item:hover{background:#3a3a5a;color:#fff}
+.p1-modal-ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.p1-modal-ov.show{display:flex}
+.p1-modal{background:#1e1e3a;border-radius:12px;width:440px;max-height:90vh;overflow-y:auto;padding:28px}
+.p1-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.p1-modal-header h3{font-size:16px;font-weight:600}
+.p1-modal-close{width:28px;height:28px;border-radius:50%;border:1px solid #555;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.p1-modal .preview-img{width:100%;height:200px;border-radius:8px;overflow:hidden;margin-bottom:20px;background:#2a2a4a}
+.p1-modal .preview-img img{width:100%;height:100%;object-fit:cover}
+.p1-fg{margin-bottom:16px}
+.p1-fg label{display:block;font-size:13px;color:#999;margin-bottom:6px}
+.p1-fg input,.p1-fg textarea{width:100%;background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:10px 14px;color:#fff;font-size:13px;outline:none;resize:none}
+.p1-fg textarea{min-height:100px;line-height:1.6}
+.p1-modal-footer{display:flex;justify-content:flex-end;margin-top:20px}
+.p1-modal-footer .confirm-btn{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;border:none;padding:10px 32px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+.p1-import-ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:150;align-items:center;justify-content:center}
+.p1-import-ov.show{display:flex}
+.p1-import-modal{background:#1e1e3a;border-radius:12px;width:820px;height:620px;display:flex;flex-direction:column}
+.p1-import-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px}
+.p1-import-header h3{font-size:16px;font-weight:600}
+.p1-import-header .im-close{width:28px;height:28px;border-radius:50%;border:1px solid #555;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.p1-import-body{flex:1;padding:0 24px;display:flex;align-items:center;justify-content:center}
+.p1-import-body .empty{color:#888;font-size:14px}
+.p1-import-footer{padding:16px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between}
+.p1-import-footer .selected-info{color:#999;font-size:13px}
+.p1-import-footer .im-btns{display:flex;gap:10px}
+.p1-import-footer .im-btn{padding:8px 24px;border-radius:6px;font-size:13px;cursor:pointer;border:none}
+.p1-import-footer .im-cancel{background:#2a2a4a;color:#ccc;border:1px solid #3a3a5a}
+.p1-import-footer .im-confirm{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;font-weight:600}
+.p1-full-ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:200}
+.p1-full-ov.show{display:flex;flex-direction:column}
+.p1-fullmodal{width:100%;height:100%;display:flex;flex-direction:column;background:#1a1a2e}
+.p1-fm-top{display:flex;align-items:center;padding:16px 24px;border-bottom:1px solid #2a2a4a}
+.p1-fm-top .fm-close{width:32px;height:32px;border-radius:50%;border:1px solid #555;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-right:16px}
+.p1-fm-top h3{font-size:16px;font-weight:600}
+.p1-fm-body{flex:1;display:flex;overflow:hidden}
+.p1-fm-left{flex:1;display:flex;flex-direction:column;padding:20px 24px}
+.p1-fm-upload{flex:1;background:#222240;border-radius:10px;border:1px solid #2a2a4a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;position:relative}
+.p1-fm-upload .tag{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.6);color:#ccc;padding:4px 12px;border-radius:4px;font-size:12px}
+.p1-fm-upload .upload-icon{width:48px;height:48px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;margin-bottom:10px}
+.p1-fm-upload .upload-text{color:#888;font-size:13px}
+.p1-fm-right{width:300px;padding:20px 24px;border-left:1px solid #2a2a4a;display:flex;flex-direction:column}
+.p1-fm-right .fg-label{font-size:14px;color:#fff;margin-bottom:8px}
+.p1-fm-right input{width:100%;background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:10px 14px;color:#fff;font-size:13px;outline:none;margin-bottom:12px}
+.p1-fm-right .add-more-btn{width:56px;height:56px;border-radius:8px;border:1px dashed #555;background:transparent;color:#888;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;margin-left:auto;margin-bottom:20px}
+.p1-fm-right .add-more-btn:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p1-fm-bottom{padding:16px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between}
+.p1-fm-bottom-left{color:#888;font-size:13px}
+.p1-fm-bottom .fm-confirm{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;border:none;padding:12px 0;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;width:280px}
+
+/* ========== 页面2：片段编辑 ========== */
+.p2-wrap{overflow:hidden;height:100vh}
+.p2-topnav{display:flex;align-items:center;padding:10px 20px;background:#16162a;border-bottom:1px solid #2a2a4a;height:48px}
+.p2-topnav .nav-left{display:flex;align-items:center;gap:10px}
+.p2-close{width:28px;height:28px;border-radius:50%;border:1px solid #444;background:transparent;color:#999;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.p2-topnav .nav-icon{color:#4ecdc4;font-size:14px}
+.p2-topnav .nav-title{color:#4ecdc4;font-size:14px;font-weight:600}
+.p2-topnav .nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.p2-topnav .nav-right .label{color:#999;font-size:13px}
+.p2-topnav .nav-right .coins{color:#f0c040;font-size:13px}
+.p2-topnav .nav-right .coins::before{content:'● ';font-size:8px}
+.p2-step-btn{background:transparent;border:1px solid #555;color:#ccc;padding:5px 16px;border-radius:4px;cursor:pointer;font-size:13px}
+.p2-export-btn{background:#4ecdc4;color:#000;border:none;padding:5px 16px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600}
+.p2-main{display:flex;height:calc(100vh - 48px)}
+.p2-left{width:280px;background:#12122a;border-right:1px solid #2a2a4a;display:flex;flex-direction:column;overflow:hidden}
+.p2-left-header{padding:12px 16px;font-size:13px;color:#999;border-bottom:1px solid #2a2a4a}
+.p2-clip-list{flex:1;overflow-y:auto;padding:8px}
+.p2-clip{display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;margin-bottom:6px}
+.p2-clip:hover,.p2-clip.active{background:#1e1e3a}
+.p2-clip-thumb{width:48px;height:48px;border-radius:6px;background:#2a2a3a;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.p2-clip-thumb .play-icon{color:#888;font-size:14px}
+.p2-clip-info{flex:1;min-width:0}
+.p2-clip-info .clip-title{font-size:13px;font-weight:600;margin-bottom:3px;color:#ddd}
+.p2-clip-info .clip-desc{font-size:11px;color:#777;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.p2-center{flex:1;display:flex;flex-direction:column}
+.p2-center-content{flex:1}
+.p2-bottom-bar{padding:10px 20px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between;background:#16162a}
+.p2-play-btn{width:36px;height:36px;border-radius:50%;background:#2a2a4a;border:1px solid #3a3a5a;color:#ccc;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.p2-bottom-center{color:#666;font-size:12px}
+.p2-bottom-right{display:flex;align-items:center;gap:12px}
+.p2-model-tag{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:4px;padding:4px 10px;color:#ccc;font-size:12px}
+.p2-gen-btn{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;border:none;padding:8px 28px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+.p2-right{width:280px;background:#12122a;border-left:1px solid #2a2a4a;display:flex;flex-direction:column;overflow-y:auto}
+.p2-rtabs{display:flex;padding:12px 16px 0;gap:16px;border-bottom:1px solid #2a2a4a}
+.p2-rtab{font-size:13px;color:#888;cursor:pointer;padding-bottom:10px;border-bottom:2px solid transparent}
+.p2-rtab.active{color:#4ecdc4;border-bottom-color:#4ecdc4}
+.p2-rcontent{flex:1;padding:16px;overflow-y:auto}
+.p2-sec-title{font-size:13px;color:#999;margin-bottom:10px}
+.p2-char-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.p2-char-item{text-align:center;cursor:pointer}
+.p2-char-avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid transparent;margin-bottom:4px}
+.p2-char-avatar img{width:100%;height:100%;object-fit:cover}
+.p2-char-item.selected .p2-char-avatar{border-color:#4ecdc4}
+.p2-char-name{font-size:11px;color:#ccc}
+.p2-char-add{width:56px;height:56px;border-radius:50%;border:1px dashed #555;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px;cursor:pointer}
+.p2-char-add:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p2-scene-row{display:flex;gap:10px;margin-bottom:6px;align-items:center}
+.p2-scene-thumb{width:72px;height:52px;border-radius:6px;overflow:hidden;border:2px solid #4ecdc4;cursor:pointer}
+.p2-scene-thumb img{width:100%;height:100%;object-fit:cover}
+.p2-scene-add{width:52px;height:52px;border-radius:6px;border:1px dashed #555;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px;cursor:pointer}
+.p2-scene-add:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p2-scene-label{font-size:12px;color:#ccc;margin-bottom:16px}
+.p2-prop-row{display:flex;gap:10px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.p2-prop-wrap{position:relative;display:inline-block}
+.p2-prop-thumb{width:72px;height:52px;border-radius:6px;overflow:hidden;border:2px solid transparent;cursor:pointer}
+.p2-prop-thumb.selected{border-color:#4ecdc4}
+.p2-prop-thumb img{width:100%;height:100%;object-fit:cover}
+.p2-prop-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#ff4757;border:2px solid #12122a;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;opacity:0;transition:opacity .2s;line-height:1}
+.p2-prop-wrap:hover .p2-prop-del{opacity:1}
+.p2-prop-add{width:52px;height:52px;border-radius:6px;border:1px dashed #555;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px;cursor:pointer}
+.p2-prop-add:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p2-prop-label{font-size:12px;color:#ccc;margin-bottom:16px}
+.p2-prompt-label{font-size:13px;color:#999;margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.p2-prompt-label .info{width:14px;height:14px;border-radius:50%;border:1px solid #666;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#666}
+.p2-prompt-text{font-size:12px;color:#aaa;line-height:1.7;margin-bottom:16px}
+.p2-bgm-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#1e1e3a;border-radius:6px}
+.p2-bgm-icon{width:28px;height:28px;border-radius:50%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px}
+.p2-bgm-text{font-size:12px;color:#999}
+.p2-bgm-arrow{margin-left:auto;color:#666;font-size:12px}
+
+/* 片段编辑弹窗 */
+.p2-modal-ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.p2-modal-ov.show{display:flex}
+.p2-apm{background:#1e1e3a;border-radius:12px;width:640px;max-height:80vh;display:flex;flex-direction:column}
+.p2-apm-header{display:flex;align-items:center;padding:20px 24px 16px;gap:12px}
+.p2-apm-header h3{font-size:16px;font-weight:600;white-space:nowrap}
+.p2-apm-header .add-prop-btn{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:6px 14px;color:#ccc;font-size:13px;cursor:pointer;white-space:nowrap}
+.p2-apm-header .add-prop-btn:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p2-apm-close{width:28px;height:28px;border-radius:50%;border:1px solid #555;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:auto}
+.p2-apm-body{flex:1;padding:0 24px 16px;overflow-y:auto}
+.p2-apm-group{margin-bottom:20px}
+.p2-apm-group-title{font-size:14px;color:#ccc;margin-bottom:12px;font-weight:600}
+.p2-apm-grid{display:flex;gap:12px;flex-wrap:wrap}
+.p2-apm-card{width:120px;position:relative;cursor:pointer}
+.p2-apm-card-img{width:120px;height:88px;border-radius:8px;overflow:hidden;border:2px solid transparent;background:#2a2a4a}
+.p2-apm-card-img img{width:100%;height:100%;object-fit:cover}
+.p2-apm-card.selected .p2-apm-card-img{border-color:#4ecdc4}
+.p2-apm-card .check{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;z-index:2}
+.p2-apm-card.selected .check{background:#4ecdc4;border-color:#4ecdc4;color:#000}
+.p2-apm-card-label{font-size:11px;color:#999;text-align:center;margin-top:4px}
+.p2-apm-add{width:120px;height:88px;border-radius:8px;border:1px dashed #555;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:#888;font-size:12px}
+.p2-apm-add:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p2-apm-add .plus{font-size:22px;line-height:1}
+.p2-apm-footer{padding:16px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between}
+.p2-apm-footer-left{display:flex;align-items:center;gap:8px;color:#999;font-size:13px}
+.p2-sel-thumbs{display:flex;gap:4px}
+.p2-sel-thumb{width:32px;height:32px;border-radius:4px;overflow:hidden;border:1px solid #3a3a5a}
+.p2-sel-thumb img{width:100%;height:100%;object-fit:cover}
+.p2-apm-footer-right{display:flex;gap:10px}
+.p2-apm-btn{padding:8px 24px;border-radius:6px;font-size:13px;cursor:pointer;border:none}
+.p2-apm-cancel{background:#2a2a4a;color:#ccc;border:1px solid #3a3a5a}
+.p2-apm-confirm{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;font-weight:600}
+.p2-np-ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a2e;z-index:200;flex-direction:column}
+.p2-np-ov.show{display:flex}
+.p2-np-topbar{display:flex;align-items:center;padding:14px 24px;border-bottom:1px solid #2a2a4a;background:#16162a}
+.p2-np-topbar .np-close{width:32px;height:32px;border-radius:50%;border:1px solid #444;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-right:16px}
+.p2-np-topbar h2{font-size:15px;font-weight:600}
+.p2-np-main{flex:1;display:flex;overflow:hidden}
+.p2-np-left{flex:1;display:flex;flex-direction:column;padding:20px 24px}
+.p2-np-subtitle{font-size:13px;color:#ccc;margin-bottom:16px}
+.p2-np-preview{flex:1;background:#222240;border-radius:10px;border:1px solid #2a2a4a;display:flex;align-items:center;justify-content:center;min-height:300px}
+.p2-np-preview .pending{display:flex;flex-direction:column;align-items:center;gap:8px;color:#666}
+.p2-np-preview .pending .icon{font-size:36px;opacity:.5}
+.p2-np-preview .pending .text{font-size:13px}
+.p2-np-right{width:340px;border-left:1px solid #2a2a4a;padding:20px 24px;display:flex;flex-direction:column;overflow-y:auto}
+.p2-np-right .np-sec-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:10px}
+.p2-np-right .np-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.p2-np-right .np-tag{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:6px 14px;color:#ccc;font-size:13px;cursor:pointer}
+.p2-np-right .np-tag.active{border-color:#4ecdc4;color:#4ecdc4}
+.p2-np-right .np-add-tag{width:56px;height:56px;border-radius:8px;border:1px dashed #555;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#888;font-size:12px;cursor:pointer;gap:2px}
+.p2-np-right .np-add-tag:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p2-np-right .np-add-tag .plus{font-size:18px;line-height:1}
+.p2-np-ref-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:10px;margin-top:8px}
+.p2-np-ref-row{display:flex;gap:10px;margin-bottom:20px}
+.p2-np-ref-thumb{width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #3a3a5a}
+.p2-np-ref-thumb img{width:100%;height:100%;object-fit:cover}
+.p2-np-ref-main{width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #3a3a5a;position:relative;background:#2a2a4a}
+.p2-np-ref-main img{width:100%;height:100%;object-fit:cover}
+.p2-np-ref-main .tag{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);text-align:center;font-size:9px;color:#ccc;padding:2px 0}
+.p2-np-prompt-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:8px}
+.p2-np-prompt-area{display:flex;gap:10px;margin-bottom:6px}
+.p2-np-textarea{flex:1;background:#2a2a4a;border:1px solid #3a3a5a;border-radius:8px;padding:12px;color:#aaa;font-size:13px;resize:none;min-height:160px;outline:none;line-height:1.6}
+.p2-np-textarea:focus{border-color:#4ecdc4;color:#fff}
+.p2-np-upload{width:48px;height:48px;border-radius:8px;border:1px solid #3a3a5a;background:#2a2a4a;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#888;font-size:20px}
+.p2-np-upload:hover{border-color:#4ecdc4;color:#4ecdc4}
+.p2-np-charcount{text-align:right;font-size:11px;color:#666;margin-bottom:16px}
+.p2-np-model-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:8px}
+.p2-np-model-sel{width:100%;background:#2a2a4a;border:1px solid #3a3a5a;border-radius:8px;padding:10px 14px;color:#ccc;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.p2-np-model-sel .coin{color:#f0c040;font-size:12px;margin-left:6px}
+.p2-np-gen-btn{width:100%;background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;border:none;padding:12px 0;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.p2-np-bottom{padding:12px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;gap:12px;background:#16162a}
+.p2-np-bottom .np-desc{flex:1;font-size:12px;color:#777;line-height:1.5}
+.p2-np-bottom .np-history{display:flex;align-items:center;gap:8px;color:#888;font-size:12px}
+.p2-np-bottom .np-history-icon{width:36px;height:36px;border-radius:8px;background:#2a2a4a;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.p2-addprop-ov{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center}
+.p2-addprop-ov.show{display:flex}
+.p2-addprop-modal{background:#1e1e3a;border-radius:12px;width:820px;height:620px;display:flex;flex-direction:column}
+.p2-ap-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px}
+.p2-ap-header h3{font-size:16px;font-weight:600}
+.p2-ap-header .ap-close{width:28px;height:28px;border-radius:50%;border:1px solid #555;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.p2-ap-toolbar{display:flex;align-items:center;justify-content:flex-end;padding:0 24px 12px}
+.p2-ap-filter{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:8px 16px;color:#ccc;font-size:13px;cursor:pointer}
+.p2-ap-body{flex:1;padding:0 24px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start}
+.p2-ap-item{width:120px;cursor:pointer;position:relative}
+.p2-ap-item-img{width:120px;height:88px;border-radius:8px;overflow:hidden;border:2px solid transparent;background:#2a2a4a}
+.p2-ap-item-img img{width:100%;height:100%;object-fit:cover}
+.p2-ap-item.selected .p2-ap-item-img{border-color:#4ecdc4}
+.p2-ap-item .ap-check{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;z-index:2}
+.p2-ap-item.selected .ap-check{background:#4ecdc4;border-color:#4ecdc4;color:#000}
+.p2-ap-item-label{font-size:11px;color:#999;text-align:center;margin-top:4px}
+.p2-ap-footer{padding:16px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between}
+.p2-ap-footer-left{display:flex;align-items:center;gap:8px;color:#999;font-size:13px}
+.p2-ap-footer-right{display:flex;gap:10px}
+.p2-ap-btn{padding:8px 24px;border-radius:6px;font-size:13px;cursor:pointer;border:none}
+.p2-ap-cancel{background:#2a2a4a;color:#ccc;border:1px solid #3a3a5a}
+.p2-ap-confirm{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;font-weight:600}
+
+.float-btn{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#f0c040,#e0a020);border:none;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(240,192,64,.3);z-index:50}
+.hidden-file{display:none}
+</style>
+</head>
+<body>
+<input type="file" class="hidden-file" id="localFileInput" accept="image/*" multiple>
+
+<!-- ==================== 页面1：资产确认 ==================== -->
+<div id="pageAsset" class="page active">
+  <div class="p1-topnav">
+    <button class="p1-close">&times;</button>
+    <div class="p1-steps"><div class="p1-step"><span class="num">1</span> 基本信息</div><div class="p1-step"><span class="num">2</span> 剧本分集</div><div class="p1-step active"><span class="num">3</span> 资产确认</div><div class="p1-step"><span class="num">4</span> 片段编辑</div></div>
+    <div class="p1-topright"><span class="balance">余额</span><span class="coins">&#9679; 199179</span><button class="p1-nav-btn" onclick="goToPage('pageEdit')">下一步</button></div>
+  </div>
+  <div class="p1-main">
+    <div class="p1-sidebar"><span class="p1-sidebar-label">选集</span><span class="p1-sidebar-num">1</span></div>
+    <div class="p1-content">
+      <div class="p1-infobar"><div class="p1-infobar-left"><h3>已智能提取出8个资产</h3><p>可通过修改提示词重新生成不满意的图片，确保角色场景符合剧本设定。</p></div><div class="p1-infobar-right"><div class="p1-model-select">nano banana pro <span class="coin">&#9679; 21/张</span> ▾</div><button class="p1-generate-btn">一键生成 &#9679; 0</button></div></div>
+      <div class="p1-tabs"><div class="p1-tab" onclick="p1_switchTab(this)">角色·7</div><div class="p1-tab" onclick="p1_switchTab(this)">场景·1</div><div class="p1-tab active" onclick="p1_switchTab(this)">道具·3</div><div class="p1-tab-right"><button class="p1-role-btn">角色音色设置 ›</button></div></div>
+      <div class="p1-cards">
+        <div class="p1-card selected" onclick="p1_selectCard(this)"><div class="card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='360'%3E%3Crect fill='%23553322' width='400' height='360'/%3E%3Crect x='185' y='40' width='8' height='200' rx='2' fill='%23aabbcc' opacity='.8'/%3E%3Crect x='207' y='40' width='8' height='200' rx='2' fill='%23aabbcc' opacity='.8'/%3E%3Ctext x='200' y='320' text-anchor='middle' fill='%23ccaa88' font-size='14'%3E青锋剑%3C/text%3E%3C/svg%3E" alt=""></div><div class="label">青锋剑</div><div class="card-bottom"><button class="cb-btn" onclick="event.stopPropagation();p1_toggleSwitch(this)">切换道具<div class="p1-switch-dd"><div class="sd-item" onclick="event.stopPropagation();p1_openImport()">道具库导入</div><div class="sd-item" onclick="event.stopPropagation()">本地导入</div></div></button><button class="cb-btn" onclick="event.stopPropagation();p1_openModal()">添加到道具库</button></div></div>
+        <div class="p1-card" onclick="p1_selectCard(this)"><div class="card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='360'%3E%3Crect fill='%23442233' width='400' height='360'/%3E%3Ccircle cx='200' cy='160' r='50' fill='%23553344' opacity='.6'/%3E%3Ccircle cx='200' cy='160' r='20' fill='%23cc8866' opacity='.8'/%3E%3Ctext x='200' y='280' text-anchor='middle' fill='%23cc99aa' font-size='14'%3E龙纹玉佩%3C/text%3E%3C/svg%3E" alt=""></div><div class="label">龙纹玉佩</div><div class="card-bottom"><button class="cb-btn" onclick="event.stopPropagation();p1_toggleSwitch(this)">切换道具<div class="p1-switch-dd"><div class="sd-item" onclick="event.stopPropagation();p1_openImport()">道具库导入</div><div class="sd-item" onclick="event.stopPropagation()">本地导入</div></div></button><button class="cb-btn" onclick="event.stopPropagation();p1_openModal()">添加到道具库</button></div></div>
+        <div class="p1-card" onclick="p1_selectCard(this)"><div class="card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='360'%3E%3Crect fill='%23224433' width='400' height='360'/%3E%3Crect x='140' y='80' width='120' height='170' rx='6' fill='%23335544' opacity='.6'/%3E%3Ctext x='200' y='310' text-anchor='middle' fill='%2388bb88' font-size='14'%3E密信%3C/text%3E%3C/svg%3E" alt=""></div><div class="label">密信</div><div class="card-bottom"><button class="cb-btn" onclick="event.stopPropagation();p1_toggleSwitch(this)">切换道具<div class="p1-switch-dd"><div class="sd-item" onclick="event.stopPropagation();p1_openImport()">道具库导入</div><div class="sd-item" onclick="event.stopPropagation()">本地导入</div></div></button><button class="cb-btn" onclick="event.stopPropagation();p1_openModal()">添加到道具库</button></div></div>
+        <div class="p1-add-card" onclick="p1_toggleAddDD(event)"><span class="plus">✦</span><span>新增道具</span><div class="p1-add-dd" id="p1AddDD"><div class="add-item" onclick="event.stopPropagation();p1_openFull()">添加本剧道具</div><div class="add-item" onclick="event.stopPropagation();p1_openFull()">模型导入</div><div class="add-item" onclick="event.stopPropagation();p1_closeDD();p1_openImport()">道具库导入</div><div class="add-item" onclick="event.stopPropagation();p1_closeDD()">本地导入</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="p1-modal-ov" id="p1Modal"><div class="p1-modal"><div class="p1-modal-header"><h3>添加到道具库</h3><button class="p1-modal-close" onclick="p1_closeModal()">&times;</button></div><div class="preview-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='360'%3E%3Crect fill='%23553322' width='400' height='360'/%3E%3C/svg%3E" alt=""></div><div class="p1-fg"><label>生图模型</label><input type="text" value="nano banana pro" readonly></div><div class="p1-fg"><label>道具名称</label><input type="text" value="青锋剑"></div><div class="p1-fg"><label>提示词</label><textarea>道具特写，无人物，画幅16:9，一把古代名剑，剑身修长笔直，剑刃泛着冷冽的青色寒光…</textarea></div><div class="p1-modal-footer"><button class="confirm-btn" onclick="p1_closeModal()">确认</button></div></div></div>
+  <div class="p1-import-ov" id="p1Import"><div class="p1-import-modal"><div class="p1-import-header"><h3>导入道具</h3><button class="im-close" onclick="p1_closeImport()">&times;</button></div><div class="p1-import-body"><div class="empty">暂无道具数据</div></div><div class="p1-import-footer"><div class="selected-info">已选</div><div class="im-btns"><button class="im-btn im-cancel" onclick="p1_closeImport()">取消</button><button class="im-btn im-confirm" onclick="p1_closeImport()">确定</button></div></div></div></div>
+  <div class="p1-full-ov" id="p1Full"><div class="p1-fullmodal"><div class="p1-fm-top"><button class="fm-close" onclick="p1_closeFull()">&times;</button><h3>新增道具</h3></div><div class="p1-fm-body"><div class="p1-fm-left"><div style="font-size:14px;color:#ccc;margin-bottom:16px">出镜形象:主形象图:主道具图</div><div class="p1-fm-upload"><div class="tag">本集出镜图</div><div class="upload-icon">+</div><div class="upload-text">点击上传</div></div></div><div class="p1-fm-right"><div class="fg-label">道具名称</div><input type="text" placeholder="请输入道具名称"><button class="add-more-btn">+ 添加</button></div></div><div class="p1-fm-bottom"><div class="p1-fm-bottom-left">历史记录 History</div><button class="fm-confirm" onclick="p1_closeFull()">确认</button></div></div></div>
+</div>
+
+<!-- ==================== 页面2：片段编辑 ==================== -->
+<div id="pageEdit" class="page">
+<div class="p2-wrap">
+  <div class="p2-topnav">
+    <div class="nav-left"><button class="p2-close">&times;</button><span class="nav-icon">···</span><span class="nav-title">片段编辑</span></div>
+    <div class="nav-right"><span class="label">余额</span><span class="coins">198964</span><button class="p2-step-btn" onclick="goToPage('pageAsset')">上一步</button><button class="p2-export-btn">导出剧照格式</button></div>
+  </div>
+  <div class="p2-main">
+    <div class="p2-left"><div class="p2-left-header">⊞ 第1集</div><div class="p2-clip-list">
+      <div class="p2-clip active"><div class="p2-clip-thumb"><span class="play-icon">▶</span></div><div class="p2-clip-info"><div class="clip-title">片段-1</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜固定镜头 俯拍…</div></div></div>
+      <div class="p2-clip"><div class="p2-clip-thumb"><span class="play-icon">▶</span></div><div class="p2-clip-info"><div class="clip-title">片段-2</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜近景 平拍…</div></div></div>
+      <div class="p2-clip"><div class="p2-clip-thumb"><span class="play-icon">▶</span></div><div class="p2-clip-info"><div class="clip-title">片段-3</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜中景 平拍…</div></div></div>
+      <div class="p2-clip"><div class="p2-clip-thumb"><span class="play-icon">▶</span></div><div class="p2-clip-info"><div class="clip-title">片段-4</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜中景 仰拍…</div></div></div>
+      <div class="p2-clip"><div class="p2-clip-thumb"><span class="play-icon">▶</span></div><div class="p2-clip-info"><div class="clip-title">片段-5</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜中景 平拍…</div></div></div>
+    </div></div>
+    <div class="p2-center"><div class="p2-center-content"></div><div class="p2-bottom-bar"><div style="display:flex;align-items:center;gap:10px"><button class="p2-play-btn">▶</button></div><div class="p2-bottom-center">历史记录 History ···</div><div class="p2-bottom-right"><span class="p2-model-tag">PopoMeta2.0 <span style="color:#f0c040">2156/次</span></span><span style="font-size:12px;color:#888">15s</span><button class="p2-gen-btn">生视频 ● 215 ◷</button></div></div></div>
+    <div class="p2-right">
+      <div class="p2-rtabs"><div class="p2-rtab active">多参生视频</div><div class="p2-rtab">多参生图</div><div class="p2-rtab">配音</div></div>
+      <div class="p2-rcontent">
+        <div class="p2-sec-title">角色 Character</div>
+        <div class="p2-char-grid">
+          <div class="p2-char-item selected"><div class="p2-char-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23334455' width='56' height='56'/%3E%3Ccircle cx='28' cy='20' r='10' fill='%23556677'/%3E%3Cellipse cx='28' cy='44' rx='16' ry='12' fill='%23556677'/%3E%3C/svg%3E" alt=""></div><div class="p2-char-name">沈瑜</div></div>
+          <div class="p2-char-item"><div class="p2-char-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23443344' width='56' height='56'/%3E%3Ccircle cx='28' cy='20' r='10' fill='%23665566'/%3E%3Cellipse cx='28' cy='44' rx='16' ry='12' fill='%23665566'/%3E%3C/svg%3E" alt=""></div><div class="p2-char-name">沈璋</div></div>
+          <div class="p2-char-item"><div class="p2-char-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23334433' width='56' height='56'/%3E%3Ccircle cx='28' cy='20' r='10' fill='%23556655'/%3E%3Cellipse cx='28' cy='44' rx='16' ry='12' fill='%23556655'/%3E%3C/svg%3E" alt=""></div><div class="p2-char-name">世家公子</div></div>
+          <div class="p2-char-add">+</div>
+        </div>
+        <div class="p2-sec-title">场景 Scene</div>
+        <div class="p2-scene-row"><div class="p2-scene-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='104'%3E%3Crect fill='%23553322' width='144' height='104'/%3E%3C/svg%3E" alt=""></div><div class="p2-scene-add">→</div></div>
+        <div class="p2-scene-label">沈家宴会厅</div>
+        <div class="p2-sec-title">道具 Props</div>
+        <div class="p2-prop-row">
+          <div class="p2-prop-wrap" data-name="青锋剑"><button class="p2-prop-del" onclick="p2_deleteProp(this)">&times;</button><div class="p2-prop-thumb selected" onclick="p2_selectProp(this)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='104'%3E%3Crect fill='%23553322' width='144' height='104'/%3E%3Crect x='65' y='10' width='6' height='60' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='73' y='10' width='6' height='60' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3C/svg%3E" alt=""></div></div>
+          <div class="p2-prop-wrap" data-name="龙纹玉佩"><button class="p2-prop-del" onclick="p2_deleteProp(this)">&times;</button><div class="p2-prop-thumb" onclick="p2_selectProp(this)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='104'%3E%3Crect fill='%23442233' width='144' height='104'/%3E%3Ccircle cx='72' cy='44' r='22' fill='%23553344' opacity='.6'/%3E%3C/svg%3E" alt=""></div></div>
+          <div class="p2-prop-add" onclick="p2_openApm()">+</div>
+        </div>
+        <div class="p2-prop-label" id="p2PropLabel">青锋剑</div>
+        <div style="margin-top:4px">
+          <div class="p2-prompt-label">提示词 Prompt <span class="info">i</span></div>
+          <div class="p2-prompt-text">分镜序号:1，板面画具器、俯拍、固定镜头人，沈家宴会厅…</div>
+          <div class="p2-bgm-row"><div class="p2-bgm-icon">♪</div><div class="p2-bgm-text">无影调</div><div class="p2-bgm-arrow">›</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 片段编辑弹窗 -->
+<div class="p2-modal-ov" id="p2Apm"><div class="p2-apm"><div class="p2-apm-header"><h3 id="p2ApmTitle">出镜道具（2/3）</h3><button class="add-prop-btn" onclick="p2_openNp()">+ 添加道具</button><button class="p2-apm-close" onclick="p2_closeApm()">&times;</button></div><div class="p2-apm-body">
+  <div class="p2-apm-group"><div class="p2-apm-group-title">青锋剑</div><div class="p2-apm-grid"><div class="p2-apm-card selected" onclick="p2_toggleCard(this)"><div class="check">✓</div><div class="p2-apm-card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23553322' width='240' height='176'/%3E%3C/svg%3E" alt=""></div><div class="p2-apm-card-label">主图</div></div><div class="p2-apm-add" onclick="p2_openNpFor('青锋剑')"><span class="plus">+</span><span>新增道具</span></div></div></div>
+  <div class="p2-apm-group"><div class="p2-apm-group-title">龙纹玉佩</div><div class="p2-apm-grid"><div class="p2-apm-card selected" onclick="p2_toggleCard(this)"><div class="check">✓</div><div class="p2-apm-card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23442233' width='240' height='176'/%3E%3C/svg%3E" alt=""></div><div class="p2-apm-card-label">主图</div></div><div class="p2-apm-add" onclick="p2_openNpFor('龙纹玉佩')"><span class="plus">+</span><span>新增道具</span></div></div></div>
+  <div class="p2-apm-group"><div class="p2-apm-group-title">密信</div><div class="p2-apm-grid"><div class="p2-apm-card" onclick="p2_toggleCard(this)"><div class="check">✓</div><div class="p2-apm-card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23224433' width='240' height='176'/%3E%3C/svg%3E" alt=""></div><div class="p2-apm-card-label">主图</div></div><div class="p2-apm-add" onclick="p2_openNpFor('密信')"><span class="plus">+</span><span>新增道具</span></div></div></div>
+</div><div class="p2-apm-footer"><div class="p2-apm-footer-left"><span>已选</span><div class="p2-sel-thumbs"><div class="p2-sel-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%23553322' width='64' height='64'/%3E%3C/svg%3E" alt=""></div><div class="p2-sel-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%23442233' width='64' height='64'/%3E%3C/svg%3E" alt=""></div></div></div><div class="p2-apm-footer-right"><button class="p2-apm-btn p2-apm-cancel" onclick="p2_closeApm()">取消</button><button class="p2-apm-btn p2-apm-confirm" onclick="p2_closeApm()">确定</button></div></div></div></div>
+<div class="p2-np-ov" id="p2Np"><div class="p2-np-topbar"><button class="np-close" onclick="p2_closeNp()">&times;</button><h2 id="p2NpTitle">青锋剑</h2></div><div class="p2-np-main"><div class="p2-np-left"><div class="p2-np-subtitle" id="p2NpSub">出镜形象·造型图·青锋剑 -道具1</div><div class="p2-np-preview"><div class="pending"><div class="icon">🖼</div><div class="text">待生成</div></div></div></div><div class="p2-np-right"><div class="np-sec-label">道具 Props</div><div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px"><div class="np-tags"><div class="np-tag active" id="p2NpTag">青锋剑</div><div class="np-tag">道具1</div></div><div class="np-add-tag" onclick="p2_openApLib()"><span class="plus">+</span><span>添加</span></div></div><div class="p2-np-ref-label">主道具垫图 Image Reference</div><div class="p2-np-ref-row"><div class="p2-np-ref-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Crect fill='%23553322' width='128' height='128'/%3E%3C/svg%3E" alt=""></div><div style="flex:1"></div><div class="p2-np-ref-main"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Crect fill='%23553322' width='128' height='128'/%3E%3C/svg%3E" alt=""><div class="tag">主道具图</div></div></div><div class="p2-np-prompt-label">画面提示词</div><div class="p2-np-prompt-area"><textarea class="p2-np-textarea" id="p2NpTa" placeholder="请输入该道具在不同状态下的提示词"></textarea><div class="p2-np-upload">🖼</div></div><div class="p2-np-charcount" id="p2NpCC">0/800</div><div class="p2-np-model-label">文生图模型</div><div class="p2-np-model-sel"><span>nano banana pro <span class="coin">● 21/张</span></span><span>▾</span></div><button class="p2-np-gen-btn">生成 <span class="coin">● 21</span></button></div></div><div class="p2-np-bottom"><div class="np-desc">道具特写，无人物，画幅16:9…</div><div class="np-history"><span>历史记录 History</span><div class="np-history-icon">🖼</div></div></div></div>
+<div class="p2-addprop-ov" id="p2ApLib"><div class="p2-addprop-modal"><div class="p2-ap-header"><h3>添加道具</h3><button class="ap-close" onclick="p2_closeApLib()">&times;</button></div><div class="p2-ap-toolbar"><div class="p2-ap-filter">风格 ▼</div></div><div class="p2-ap-body">
+  <div class="p2-ap-item selected" onclick="this.classList.toggle('selected')"><div class="ap-check">✓</div><div class="p2-ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23553322' width='240' height='176'/%3E%3C/svg%3E" alt=""></div><div class="p2-ap-item-label">青锋剑</div></div>
+  <div class="p2-ap-item" onclick="this.classList.toggle('selected')"><div class="ap-check">✓</div><div class="p2-ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23442233' width='240' height='176'/%3E%3C/svg%3E" alt=""></div><div class="p2-ap-item-label">龙纹玉佩</div></div>
+  <div class="p2-ap-item" onclick="this.classList.toggle('selected')"><div class="ap-check">✓</div><div class="p2-ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23224433' width='240' height='176'/%3E%3C/svg%3E" alt=""></div><div class="p2-ap-item-label">密信</div></div>
+</div><div class="p2-ap-footer"><div class="p2-ap-footer-left"><span>已选</span></div><div class="p2-ap-footer-right"><button class="p2-ap-btn p2-ap-cancel" onclick="p2_closeApLib()">取消</button><button class="p2-ap-btn p2-ap-confirm" onclick="p2_closeApLib()">确定</button></div></div></div></div>
+</div>
+
+<button class="float-btn">?</button>
+
+<script>
+function goToPage(id){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+
+/* 页面1：资产确认 */
+function p1_switchTab(el){document.querySelectorAll('.p1-tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active')}
+function p1_selectCard(el){document.querySelectorAll('.p1-card').forEach(function(c){c.classList.remove('selected')});el.classList.add('selected')}
+function p1_openModal(){p1_closeDD();document.getElementById('p1Modal').classList.add('show')}
+function p1_closeModal(){document.getElementById('p1Modal').classList.remove('show')}
+function p1_openImport(){p1_closeDD();document.getElementById('p1Import').classList.add('show')}
+function p1_closeImport(){document.getElementById('p1Import').classList.remove('show')}
+function p1_openFull(){p1_closeDD();document.getElementById('p1Full').classList.add('show')}
+function p1_closeFull(){document.getElementById('p1Full').classList.remove('show')}
+function p1_toggleAddDD(e){e.stopPropagation();document.getElementById('p1AddDD').classList.toggle('show')}
+function p1_toggleSwitch(btn){event.stopPropagation();var dd=btn.querySelector('.p1-switch-dd');document.querySelectorAll('.p1-switch-dd').forEach(function(x){if(x!==dd)x.classList.remove('show')});dd.classList.toggle('show')}
+function p1_closeDD(){document.querySelectorAll('.p1-switch-dd,.p1-add-dd').forEach(function(x){x.classList.remove('show')})}
+document.getElementById('p1Modal').addEventListener('click',function(e){if(e.target===this)p1_closeModal()});
+document.getElementById('p1Import').addEventListener('click',function(e){if(e.target===this)p1_closeImport()});
+document.addEventListener('click',function(e){if(!e.target.closest('.p1-add-card'))document.getElementById('p1AddDD').classList.remove('show');if(!e.target.closest('.cb-btn'))document.querySelectorAll('.p1-switch-dd').forEach(function(x){x.classList.remove('show')})});
+
+/* 页面2：片段编辑 */
+function p2_openApm(){document.getElementById('p2Apm').classList.add('show')}
+function p2_closeApm(){document.getElementById('p2Apm').classList.remove('show')}
+function p2_toggleCard(el){el.classList.toggle('selected');var s=document.querySelectorAll('.p2-apm-card.selected').length,t=document.querySelectorAll('.p2-apm-card').length;document.getElementById('p2ApmTitle').textContent='出镜道具（'+s+'/'+t+'）'}
+function p2_openNp(){document.getElementById('p2Np').classList.add('show')}
+function p2_openNpFor(n){document.getElementById('p2NpTitle').textContent=n;document.getElementById('p2NpSub').textContent='出镜形象·造型图·'+n+' -道具1';document.getElementById('p2NpTag').textContent=n;p2_openNp()}
+function p2_closeNp(){document.getElementById('p2Np').classList.remove('show')}
+function p2_openApLib(){document.getElementById('p2ApLib').classList.add('show')}
+function p2_closeApLib(){document.getElementById('p2ApLib').classList.remove('show')}
+function p2_selectProp(el){document.querySelectorAll('.p2-prop-thumb').forEach(function(x){x.classList.remove('selected')});el.classList.add('selected');document.getElementById('p2PropLabel').textContent=el.closest('.p2-prop-wrap').getAttribute('data-name')}
+function p2_deleteProp(btn){var w=btn.closest('.p2-prop-wrap');if(confirm('确定删除？')){w.remove();var r=document.querySelectorAll('.p2-prop-wrap');if(r.length>0){r[0].querySelector('.p2-prop-thumb').classList.add('selected');document.getElementById('p2PropLabel').textContent=r[0].getAttribute('data-name')}else{document.getElementById('p2PropLabel').textContent='暂无道具'}}}
+document.getElementById('p2NpTa').addEventListener('input',function(){document.getElementById('p2NpCC').textContent=this.value.length+'/800'});
+document.getElementById('p2Apm').addEventListener('click',function(e){if(e.target===this)p2_closeApm()});
+document.getElementById('p2ApLib').addEventListener('click',function(e){if(e.target===this)p2_closeApLib()});
+</script>
+</body>
+</html>

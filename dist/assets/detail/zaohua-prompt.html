@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>【造化】【主页】【Prompt输入】AI优化 + 灵感 + 常用提示词</title>
+<style>
+  :root{
+    --bg:#0d0e11; --panel:#16181d; --panel2:#1c1f26; --line:#2a2e37;
+    --ink:#e8eaed; --dim:#9aa0aa; --dim2:#6e7480;
+    --orange:#ff6a1a; --orange-dim:#ff8c4d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:14px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(900px 420px at 50% -8%, rgba(255,106,26,.16), transparent 70%),
+      radial-gradient(600px 300px at 85% 15%, rgba(255,140,77,.07), transparent 70%);
+  }
+
+  /* ---------- 左侧导航 ---------- */
+  .rail{
+    position:fixed; left:0; top:0; bottom:0; width:56px; z-index:20;
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+    padding:18px 0; background:rgba(13,14,17,.82); border-right:1px solid var(--line);
+    backdrop-filter:blur(8px);
+  }
+  .rail .dot{width:20px;height:20px;border-radius:6px;background:#2b2f38}
+  .rail .dot.on{background:linear-gradient(140deg,var(--orange),#ff9d5c)}
+  .rail .spacer{flex:1}
+
+  /* ---------- 布局 ---------- */
+  .wrap{position:relative; z-index:1; margin-left:56px; padding:0 32px 80px}
+  header{display:flex;align-items:center;gap:10px;padding:18px 0 0}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
+  .flame{
+    width:22px;height:22px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%,#ffd24a,var(--orange) 60%,#c93a00);
+  }
+
+  .hero{max-width:1080px;margin:0 auto;padding:52px 0 0;text-align:center}
+  h1{font-size:34px;line-height:1.35;margin:0 0 26px;letter-spacing:.5px;font-weight:700}
+  h1 em{font-style:normal;color:var(--orange)}
+
+  /* ---------- 输入卡 ---------- */
+  .composer{
+    max-width:760px;margin:0 auto;text-align:left;
+    background:rgba(28,31,38,.72); border:1px solid var(--line); border-radius:16px;
+    padding:16px 16px 12px; backdrop-filter:blur(14px);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .composer:focus-within{border-color:rgba(255,106,26,.5);box-shadow:0 18px 60px rgba(255,106,26,.10)}
+  textarea{
+    width:100%;min-height:74px;max-height:220px;resize:none;border:0;outline:0;background:transparent;
+    color:var(--ink);font:15px/1.75 inherit;padding:2px 2px 0;
+  }
+  textarea::placeholder{color:var(--dim2)}
+
+  /* 优化结果提示条 */
+  .optbar{
+    display:none;align-items:center;gap:10px;margin:10px 0 0;padding:8px 12px;
+    background:rgba(255,106,26,.10);border:1px solid rgba(255,106,26,.28);border-radius:9px;
+    font-size:12.5px;color:var(--orange-dim);
+  }
+  .optbar.show{display:flex}
+  .optbar .undo{
+    margin-left:auto;color:var(--ink);background:transparent;border:1px solid var(--line);
+    padding:3px 10px;border-radius:6px;cursor:pointer;font-size:12px;
+  }
+  .optbar .undo:hover{border-color:var(--dim)}
+
+  /* 选中文字后的收藏条 */
+  .selbar{
+    display:none;align-items:center;gap:9px;margin:10px 0 0;padding:7px 12px;
+    background:rgba(90,160,255,.10);border:1px solid rgba(120,175,255,.3);border-radius:9px;
+    font-size:12.5px;color:#9cc4ff;
+  }
+  .selbar.show{display:flex}
+  .selbar .q{
+    color:#cdd6e3;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .selbar .sp{margin-left:auto;display:flex;gap:7px}
+  .selbar button{
+    background:rgba(120,175,255,.16);border:1px solid rgba(120,175,255,.35);color:#dce8ff;
+    padding:3px 10px;border-radius:6px;cursor:pointer;font-size:12px;
+  }
+  .selbar button:hover{background:rgba(120,175,255,.3)}
+  .selbar button.ghost{background:transparent;border-color:var(--line);color:var(--dim)}
+  .selbar button.ghost:hover{border-color:var(--dim);color:var(--ink)}
+
+  /* 工具行 */
+  .tools{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;
+    border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);
+    color:var(--ink);font-size:13px;cursor:pointer;white-space:nowrap;
+    transition:.16s;
+  }
+  .btn:hover{background:rgba(255,255,255,.07);border-color:#3a3f4a}
+  .btn:disabled{opacity:.38;cursor:not-allowed}
+  .btn.primary{border-color:rgba(255,106,26,.45);background:rgba(255,106,26,.14);color:#ffb488}
+  .btn.primary:hover:not(:disabled){background:rgba(255,106,26,.22)}
+  .btn .ic{font-size:13px;line-height:1}
+  .grow{flex:1}
+  .hint{font-size:12px;color:var(--dim2)}
+  .count{font-size:12px;color:var(--dim2);font-variant-numeric:tabular-nums}
+  .send{
+    width:34px;height:34px;border-radius:50%;border:0;cursor:pointer;flex:none;
+    background:linear-gradient(140deg,#3a3f4a,#2b2f38);color:var(--dim);font-size:15px;
+    display:grid;place-items:center;transition:.18s;
+  }
+  .send.on{background:linear-gradient(140deg,var(--orange),#ff9d5c);color:#fff}
+
+  /* 模式下拉 */
+  .pop{position:relative}
+  .menu{
+    position:absolute;bottom:calc(100% + 8px);left:0;z-index:30;min-width:300px;
+    background:#1e2129;border:1px solid var(--line);border-radius:11px;padding:6px;
+    box-shadow:0 20px 50px rgba(0,0,0,.6);display:none;
+  }
+  .menu.show{display:block}
+  .menu .cap{font-size:11.5px;color:var(--dim2);padding:6px 10px 4px}
+  .mi{display:flex;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer}
+  .mi:hover{background:rgba(255,255,255,.05)}
+  .mi .tt{font-size:13.5px;display:flex;align-items:center;gap:7px}
+  .mi .ds{font-size:11.5px;color:var(--dim2);margin-top:1px;line-height:1.5}
+  .mi .ck{margin-left:auto;color:var(--orange);opacity:0;font-size:12px}
+  .mi.on .ck{opacity:1}
+  .tag{font-size:10px;padding:1px 5px;border-radius:4px;background:rgba(255,106,26,.18);color:var(--orange-dim)}
+
+  /* ---------- 灵感区 ---------- */
+  .ideas{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+  .ideas.hide{display:none}
+  .ideas .top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .ideas .top .lb{font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:6px}
+  .refresh{margin-left:auto;font-size:12px;color:var(--dim2);background:0;border:0;cursor:pointer;padding:2px 4px}
+  .refresh:hover{color:var(--orange-dim)}
+  .chips{display:flex;flex-direction:column;gap:7px}
+  .chip{
+    text-align:left;padding:9px 12px;border-radius:9px;cursor:pointer;
+    background:rgba(255,255,255,.035);border:1px solid transparent;
+    color:#c9cdd4;font-size:13px;line-height:1.6;transition:.16s;
+  }
+  .chip:hover{background:rgba(255,106,26,.10);border-color:rgba(255,106,26,.3);color:var(--ink)}
+
+  /* ---------- 常用提示词面板 ---------- */
+  .saved{
+    position:absolute;bottom:calc(100% + 8px);left:0;z-index:30;width:420px;
+    background:#1e2129;border:1px solid var(--line);border-radius:11px;
+    box-shadow:0 20px 50px rgba(0,0,0,.6);display:none;overflow:hidden;
+  }
+  .saved.show{display:block}
+  .saved .hd{
+    display:flex;align-items:center;padding:10px 13px;border-bottom:1px solid var(--line);
+    font-size:12.5px;color:var(--dim);
+  }
+  .saved .hd .n{margin-left:auto;color:var(--dim2);font-size:11.5px}
+  .saved .list{max-height:260px;overflow:auto;padding:6px}
+  .row{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:8px;cursor:pointer}
+  .row:hover{background:rgba(255,255,255,.05)}
+  .row .tx{
+    flex:1;font-size:13px;color:#c9cdd4;line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .row:hover .tx{color:var(--ink)}
+  .row .del{opacity:0;background:0;border:0;color:var(--dim2);cursor:pointer;font-size:14px;padding:0 3px;flex:none}
+  .row:hover .del{opacity:1}
+  .row .del:hover{color:#ff6b6b}
+  .row .rep{
+    opacity:0;flex:none;background:transparent;border:1px solid var(--line);color:var(--dim);
+    font-size:11px;padding:2px 7px;border-radius:5px;cursor:pointer;white-space:nowrap;
+  }
+  .row:hover .rep{opacity:1}
+  .row .rep:hover{border-color:var(--orange);color:var(--orange-dim)}
+  .saved .tip{
+    padding:7px 13px;font-size:11.5px;color:var(--dim2);
+    border-bottom:1px solid var(--line);background:rgba(255,255,255,.02);line-height:1.6;
+  }
+  .empty{padding:26px 14px;text-align:center;color:var(--dim2);font-size:12.5px;line-height:1.8}
+
+  /* ---------- 下方内容 ---------- */
+  .below{max-width:1080px;margin:44px auto 0}
+  .tabs{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+  .tab{padding:6px 14px;border-radius:999px;font-size:13px;color:var(--dim);cursor:pointer;border:1px solid transparent}
+  .tab.on{background:rgba(255,255,255,.08);color:var(--ink);border-color:var(--line)}
+  .tabs .rank{margin-left:auto;font-size:12.5px;color:var(--dim)}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .card{aspect-ratio:3/4;border-radius:11px;overflow:hidden;position:relative;cursor:pointer;transition:transform .2s}
+  .card:hover{transform:translateY(-3px)}
+  .card .nm{
+    position:absolute;left:0;right:0;bottom:0;padding:22px 10px 9px;font-size:12.5px;font-weight:600;
+    background:linear-gradient(transparent,rgba(0,0,0,.85));
+  }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:44px;transform:translate(-50%,14px);z-index:60;
+    background:#22262f;border:1px solid var(--line);border-radius:9px;padding:9px 16px;
+    font-size:13px;box-shadow:0 14px 40px rgba(0,0,0,.6);
+    opacity:0;pointer-events:none;transition:.22s;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- 说明浮层 ---------- */
+  .note{
+    position:fixed;right:20px;top:20px;z-index:50;width:308px;
+    background:rgba(24,26,32,.95);border:1px solid var(--line);border-radius:11px;
+    backdrop-filter:blur(10px);box-shadow:0 16px 44px rgba(0,0,0,.5);font-size:12.5px;
+  }
+  .note h4{margin:0;padding:11px 14px;font-size:12.5px;border-bottom:1px solid var(--line);display:flex;align-items:center;cursor:pointer}
+  .note h4 span{margin-left:auto;color:var(--dim2);font-size:11px}
+  .note .bd{padding:11px 14px 13px;color:var(--dim);line-height:1.75;max-height:70vh;overflow:auto}
+  .note.fold .bd{display:none}
+  .note b{color:var(--ink);font-weight:600}
+  .note ol{margin:6px 0 0;padding-left:17px}
+  .note li{margin:0 0 7px}
+  .note code{background:rgba(255,255,255,.07);padding:1px 5px;border-radius:4px;font-size:11.5px}
+
+  @media (max-width:1180px){ .note{display:none} }
+  @media (max-width:900px){ .grid{grid-template-columns:repeat(3,1fr)} h1{font-size:26px} }
+</style>
+</head>
+<body>
+
+<nav class="rail">
+  <div class="flame" style="width:24px;height:24px"></div>
+  <div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+  <div class="spacer"></div>
+  <div class="dot"></div><div class="dot"></div>
+</nav>
+
+<div class="wrap">
+  <header><div class="logo"><span class="flame"></span>造化工坊</div></header>
+
+  <section class="hero">
+    <h1><em>造化</em>随心，一语成境</h1>
+
+    <div class="composer" id="composer">
+      <textarea id="ta" placeholder="描述你的影视游戏灵感，创作0门槛…"></textarea>
+
+      <!-- 功能② AI 优化：结果提示条 -->
+      <div class="optbar" id="optbar">
+        <span>✨ 已用 AI 优化，你可以继续手动修改</span>
+        <button class="undo" id="undo">撤销</button>
+      </div>
+
+      <!-- 功能③ 选中部分文案 → 存为常用词 -->
+      <div class="selbar" id="selbar">
+        <span id="selCount">已选中 0 字</span>
+        <span class="q" id="selQuote"></span>
+        <span class="sp">
+          <button id="selSave">收藏选中部分</button>
+          <button class="ghost" id="selCancel">取消</button>
+        </span>
+      </div>
+
+      <!-- 工具行 -->
+      <div class="tools">
+        <!-- 模式切换（现有能力） -->
+        <div class="pop">
+          <button class="btn" id="modeBtn"><span class="ic">🎬</span><span id="modeLabel">互动影游</span> <span style="color:var(--dim2);font-size:10px">▾</span></button>
+          <div class="menu" id="modeMenu">
+            <div class="cap">选择模式</div>
+            <div class="mi on" data-mode="ivideo">
+              <div>
+                <div class="tt">互动影游 <span class="tag">推荐</span></div>
+                <div class="ds">专为剧情驱动、影视化体验设计，轻松创作沉浸式互动影游</div>
+              </div><div class="ck">✓</div>
+            </div>
+            <div class="mi" data-mode="classic">
+              <div>
+                <div class="tt">通用创作 <span style="font-size:11px;color:var(--dim2)">默认</span></div>
+                <div class="ds">适用于大多数游戏类型，输入创意即可快速开始体验</div>
+              </div><div class="ck">✓</div>
+            </div>
+            <div class="mi" data-mode="pro">
+              <div>
+                <div class="tt">专业模式 <span style="font-size:11px;color:var(--dim2)">资深用户</span></div>
+                <div class="ds">专业定制，像调用工作室一样全流程打磨作品</div>
+              </div><div class="ck">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn" id="upload"><span class="ic">📄</span>上传剧本</button>
+
+        <!-- 功能② AI 优化 -->
+        <button class="btn primary" id="optBtn" disabled><span class="ic">✨</span><span id="optText">AI 优化</span></button>
+
+        <!-- 功能③ 常用提示词 -->
+        <div class="pop">
+          <button class="btn" id="savedBtn"><span class="ic">🔖</span>常用词 <span class="count" id="savedNum">(2)</span></button>
+          <div class="saved" id="savedPanel">
+            <div class="hd">我的常用提示词<span class="n" id="savedCap">2 / 50</span></div>
+            <div class="tip">点击任一条 → 插入到光标处，不覆盖已有内容；悬停可选择「替换全部」或删除</div>
+            <div class="list" id="savedList"></div>
+          </div>
+        </div>
+        <button class="btn" id="saveBtn" disabled title="收藏当前输入"><span class="ic" id="saveIc">☆</span></button>
+
+        <span class="grow"></span>
+        <span class="count" id="count" style="display:none">0/4000</span>
+        <span class="hint">发布游戏可获 1000 积分</span>
+        <button class="send" id="send">↑</button>
+      </div>
+
+      <!-- 功能① 灵感 -->
+      <div class="ideas" id="ideas">
+        <div class="top">
+          <span class="lb">💡 没有思路？试试这些灵感</span>
+          <button class="refresh" id="refresh">换一批 ⟳</button>
+        </div>
+        <div class="chips" id="chips"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="below">
+    <div class="tabs">
+      <div class="tab on">大家在玩</div><div class="tab">互动影游</div><div class="tab">新视频影游</div>
+      <span class="rank">热玩榜 ›</span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<aside class="note" id="note">
+  <h4 id="noteHd">demo 说明：三个功能怎么共存 <span>收起</span></h4>
+  <div class="bd">
+    三个需求挂在同一个输入框上，核心设计是<b>按钮位互斥</b>，不让它们同时争夺注意力。
+
+    <ol>
+      <li><b>灵感</b>（空态出现）：输入框为空时展开灵感列表，点任意一条直接填入，「换一批」轮换。一旦有内容，整个灵感区收起，让位给优化。</li>
+      <li><b>AI 优化</b>（有内容才可点）：点击后按模式给出不同的补全方向——互动影游补剧情分支与结局，通用创作补玩法与难度曲线。优化后出现撤销入口，原文可一键还原。</li>
+      <li><b>常用提示词</b>：存和取都不破坏用户已经写的东西——
+        <br>存：<b>选中任意一段文字</b>就会浮出「收藏选中部分」，只存这一段；不选则 ☆ 存整段。
+        <br>取：点列表项<b>插入到光标处</b>，原有内容保留，多行内容自动换行接、单句用顿号接；确实想覆盖时用悬停出现的「替换全部」。
+      </li>
+    </ol>
+
+    可切换模式再点一次优化，看同一段输入的不同输出——这是需求里要写清的一条：<code>同一个优化接口在两个模式下行为不同</code>。
+  </div>
+</aside>
+
+<script>
+/* ============ 数据 ============ */
+const IDEAS = {
+  ivideo: [
+    ["民国上海，女记者调查一桩连环失踪案，她的每一次追问都会改写结局",
+     "深宫之中，以女官视角周旋于三位皇子之间，忠诚与野心只能选一个",
+     "高考前夜，转学生的日记本上写着明天将要发生的事"],
+    ["末世第七年，一家便利店成了最后的避难所，由你决定谁能进门",
+     "婚礼当天，新娘收到一条来自五年前自己的短信",
+     "小镇连续七天下雨，只有你记得昨天发生过什么"]
+  ],
+  classic: [
+    ["一只猫经营深夜食堂，客人都是睡不着的都市人",
+     "重力可以随时反转的空间站逃生游戏",
+     "只在雨天开门的旧书店经营模拟"],
+    ["用弹幕消灭病毒的塔防，弹幕来自真实观众",
+     "把城市地铁线路画成迷宫的解谜游戏",
+     "经营一家给神话生物看病的诊所"]
+  ],
+  pro: [
+    ["赛博都市送货员，昼夜双线经营 + Roguelite 路线构筑",
+     "以水墨为表现的动作游戏，招式由玩家自行组合笔画",
+     "多结局叙事策略：管理一座孤岛监狱三十年"],
+    ["潮汐驱动的开放世界，地图每 12 分钟涨落一次改变通路",
+     "卡牌 + 城建混合：每张牌都是一栋会长大的建筑",
+     "以声音为唯一线索的第一人称推理"]
+  ]
+};
+const MODE_LABEL = {ivideo:"互动影游", classic:"通用创作", pro:"专业模式"};
+const GAMES = [
+  ["聆罪录","linear-gradient(160deg,#2b1a3d,#6b2b4a)"],["女帝心计","linear-gradient(160deg,#3d1a1a,#8a3b1f)"],
+  ["雨夜书店","linear-gradient(160deg,#12303a,#2c6b6b)"],["深空回响","linear-gradient(160deg,#141c3a,#3b4b8a)"],
+  ["长安十二辰","linear-gradient(160deg,#3a2410,#8a5a1f)"],["猫の食堂","linear-gradient(160deg,#2a2416,#7a6a2f)"],
+  ["孤岛三十年","linear-gradient(160deg,#1a2a1e,#3f6b4a)"],["弹幕防线","linear-gradient(160deg,#2a1030,#6b2b7a)"],
+  ["墨行者","linear-gradient(160deg,#1c1c1c,#4a4a4a)"],["潮汐之下","linear-gradient(160deg,#0f2430,#1f5b6b)"]
+];
+
+/* ============ 状态 ============ */
+let mode = "ivideo";
+let batch = 0;
+let beforeOpt = null;
+let saved = [
+  "民国悬疑题材，女主视角，三个结局，强调对白与镜头感",
+  "轻松像素风经营游戏，单局 5 分钟，适合移动端单手操作"
+];
+
+/* ============ 元素 ============ */
+const $ = id => document.getElementById(id);
+const ta=$("ta"), optBtn=$("optBtn"), optText=$("optText"), optbar=$("optbar");
+const saveBtn=$("saveBtn"), saveIc=$("saveIc"), ideas=$("ideas"), chips=$("chips");
+const savedPanel=$("savedPanel"), savedList=$("savedList"), modeMenu=$("modeMenu");
+const selbar=$("selbar");
+
+/* ============ 选区与光标 ============ */
+/* 光标位置要一直记着：面板是点击打开的，点的那一下 textarea 已经失焦，
+   如果现场再去读 selectionStart 会拿到 0，插入就跑到开头去了。 */
+let caret = 0;
+let sel = {start:0, end:0, text:""};
+
+function readSel(){
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  if(typeof s !== "number") return;
+  caret = s;
+  if(e > s){ sel = {start:s, end:e, text:ta.value.slice(s,e)}; caret = e; }
+  else if(document.activeElement === ta){ sel = {start:s, end:s, text:""}; }
+  renderSelbar();
+}
+
+function renderSelbar(){
+  const t = sel.text.trim();
+  if(t.length >= 2){
+    $("selCount").textContent = "已选中 " + t.length + " 字";
+    $("selQuote").textContent = "「" + (t.length > 30 ? t.slice(0,30) + "…" : t) + "」";
+    selbar.classList.add("show");
+  } else {
+    selbar.classList.remove("show");
+  }
+}
+
+function clearSel(){ sel = {start:caret, end:caret, text:""}; renderSelbar(); }
+
+/* 在光标处插入，保留原有内容 */
+function insertAtCaret(text){
+  const v = ta.value;
+  if(!v.trim()){ ta.value = text; caret = text.length; return; }
+  const pos = Math.min(caret, v.length);
+  const before = v.slice(0, pos), after = v.slice(pos);
+  /* 多行内容（比如 AI 优化后的结构化文本）用换行接，单句用顿号接 */
+  const multi = /\n/.test(v) || /\n/.test(text);
+  const glue = multi ? "\n" : "，";
+  const head = before && !new RegExp("(\\n|[，,。；;、\\s])$").test(before) ? glue : "";
+  const tail = after && !new RegExp("^(\\n|[，,。；;、\\s])").test(after) ? glue : "";
+  ta.value = before + head + text + tail + after;
+  caret = (before + head + text).length;
+}
+
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),1900);
+}
+
+/* ============ 渲染 ============ */
+function renderIdeas(){
+  const list = IDEAS[mode][batch % IDEAS[mode].length];
+  chips.innerHTML = "";
+  list.forEach(text=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=text;
+    b.onclick=()=>{
+      ta.value=text; beforeOpt=null; caret=text.length;
+      optbar.classList.remove("show"); clearSel(); sync();
+      ta.focus(); ta.setSelectionRange(caret, caret);
+    };
+    chips.appendChild(b);
+  });
+}
+
+function renderSaved(){
+  $("savedNum").textContent="("+saved.length+")";
+  $("savedCap").textContent=saved.length+" / 50";
+  savedList.innerHTML="";
+  if(!saved.length){
+    savedList.innerHTML='<div class="empty">还没有常用提示词<br>输入内容后点 ☆ 收藏，下次一键复用</div>';
+    return;
+  }
+  saved.forEach((text,i)=>{
+    const row=document.createElement("div"); row.className="row";
+    const tx=document.createElement("div"); tx.className="tx"; tx.textContent=text;
+    const rep=document.createElement("button"); rep.className="rep"; rep.textContent="替换全部";
+    const del=document.createElement("button"); del.className="del"; del.textContent="×"; del.title="删除";
+
+    /* 默认插入到光标处，原有内容不动 */
+    row.onclick=()=>{
+      insertAtCaret(text);
+      savedPanel.classList.remove("show");
+      sync(); clearSel();
+      ta.focus(); ta.setSelectionRange(caret, caret);
+      toast("已插入到光标处，原有内容保留");
+    };
+    rep.onclick=e=>{
+      e.stopPropagation();
+      beforeOpt=null; optbar.classList.remove("show");
+      ta.value=text; caret=text.length;
+      savedPanel.classList.remove("show");
+      sync(); clearSel();
+      ta.focus(); ta.setSelectionRange(caret, caret);
+      toast("已替换输入框全部内容");
+    };
+    del.onclick=e=>{ e.stopPropagation(); saved.splice(i,1); renderSaved(); sync(); toast("已删除"); };
+
+    row.append(tx,rep,del); savedList.appendChild(row);
+  });
+}
+
+function sync(){
+  const v=ta.value.trim(), has=v.length>0;
+  optBtn.disabled=!has; saveBtn.disabled=!has;
+  ideas.classList.toggle("hide", has);
+  $("send").classList.toggle("on", has);
+  const c=$("count");
+  c.style.display = ta.value.length>3200 ? "inline" : "none";
+  c.textContent = ta.value.length+"/4000";
+  const part=sel.text.trim();
+  if(part.length>=2){
+    saveIc.textContent="☆"; saveIc.style.color="";
+    saveBtn.title="收藏选中的 "+part.length+" 字";
+  }else{
+    const on = has && saved.includes(v);
+    saveIc.textContent = on ? "★" : "☆";
+    saveIc.style.color = on ? "var(--orange)" : "";
+    saveBtn.title = has ? "收藏整段（也可先选中一部分文字，只收藏那一段）" : "输入内容后可收藏";
+  }
+  ta.style.height="auto"; ta.style.height=Math.min(ta.scrollHeight,220)+"px";
+}
+
+/* ============ 功能② AI 优化 ============ */
+function optimize(raw){
+  const base = raw.replace(/[。.\s]+$/,"");
+  if(mode==="ivideo") return base+`。
+
+【主角】玩家以第一人称代入故事核心人物，拥有清晰的动机与必须付出的代价。
+【核心冲突】主线围绕一个无法回避的选择推进，每章结尾给出 2–3 个分支点。
+【关键分支】第一章：是否说出真相；第二章：与谁结盟；第三章：揭穿或掩盖。
+【结局设计】3 个结局——真相、妥协、隐藏（需前两章特定选择才可解锁）。
+【视听风格】电影感画面，冷色调为主，重点场景使用人物特写与留白。`;
+  if(mode==="pro") return base+`。
+
+【核心循环】明确单局的目标—行动—反馈闭环，单局时长控制在 8–12 分钟。
+【系统构成】主系统 1 个、支撑系统不超过 2 个，避免首版系统过载。
+【数值与曲线】前 3 关教学，第 4 关引入变量，第 8 关出现组合挑战。
+【长线动力】局外成长与解锁挂钩，每局结束提供可见收益。
+【美术与技术约束】统一美术基调，界面主色不超过 3 种，优先适配 PC 与移动端。`;
+  return base+`。
+
+【核心玩法】说明玩家每局具体要做什么、怎样算赢，30 秒内可上手。
+【操作方式】同时适配 PC 与手机，单键或单指即可完成核心操作。
+【成长反馈】每局结束给出可见成长（解锁、评分、道具），驱动再来一局。
+【难度节奏】开局轻松，中段引入新变量，后段出现组合挑战。
+【画面风格】统一美术基调，界面元素克制，主色不超过 3 种。`;
+}
+
+optBtn.onclick=()=>{
+  if(optBtn.disabled) return;
+  beforeOpt=ta.value;
+  optBtn.disabled=true; optText.textContent="优化中…";
+  setTimeout(()=>{
+    ta.value=optimize(beforeOpt);
+    caret=ta.value.length;
+    optText.textContent="AI 优化";
+    optbar.classList.add("show");
+    clearSel(); sync();
+    toast("已按「"+MODE_LABEL[mode]+"」方向补全，消耗 1 积分");
+  },900);
+};
+$("undo").onclick=()=>{
+  if(beforeOpt===null) return;
+  ta.value=beforeOpt; beforeOpt=null; caret=ta.value.length;
+  optbar.classList.remove("show"); clearSel(); sync(); toast("已还原为你的原文");
+};
+
+/* ============ 功能③ 收藏 ============ */
+function addToLibrary(text){
+  const v=(text||"").trim();
+  if(!v) return false;
+  if(saved.includes(v)){ toast("这条已经在常用词里了"); return false; }
+  if(saved.length>=50){ toast("常用提示词最多 50 条，请先删除部分"); return false; }
+  saved.unshift(v); renderSaved(); sync();
+  return true;
+}
+
+/* ☆：有选区就只收藏选中部分，没有选区才收藏整段 */
+saveBtn.onclick=()=>{
+  const part=sel.text.trim();
+  if(part.length>=2){
+    if(addToLibrary(part)) toast("已收藏选中的 "+part.length+" 字");
+    return;
+  }
+  const v=ta.value.trim(); if(!v) return;
+  if(saved.includes(v)){ saved=saved.filter(s=>s!==v); renderSaved(); sync(); toast("已取消收藏"); }
+  else if(addToLibrary(v)) toast("已保存整段到常用提示词");
+};
+
+/* 选中文字后的收藏条 */
+$("selSave").onmousedown=e=>e.preventDefault();
+$("selSave").onclick=()=>{
+  const part=sel.text.trim();
+  if(addToLibrary(part)) toast("已收藏选中的 "+part.length+" 字");
+  clearSel();
+};
+$("selCancel").onmousedown=e=>e.preventDefault();
+$("selCancel").onclick=()=>clearSel();
+$("savedBtn").onclick=e=>{ e.stopPropagation(); modeMenu.classList.remove("show"); savedPanel.classList.toggle("show"); };
+
+/* ============ 模式 ============ */
+$("modeBtn").onclick=e=>{ e.stopPropagation(); savedPanel.classList.remove("show"); modeMenu.classList.toggle("show"); };
+modeMenu.querySelectorAll(".mi").forEach(mi=>{
+  mi.onclick=()=>{
+    mode=mi.dataset.mode;
+    modeMenu.querySelectorAll(".mi").forEach(x=>x.classList.toggle("on",x===mi));
+    $("modeLabel").textContent=MODE_LABEL[mode];
+    modeMenu.classList.remove("show");
+    batch=0; renderIdeas();
+    toast("已切到「"+MODE_LABEL[mode]+"」，灵感与优化方向同步变化");
+  };
+});
+
+/* ============ 其他 ============ */
+$("refresh").onclick=()=>{ batch++; renderIdeas(); };
+$("upload").onclick=()=>toast("上传剧本：现有能力，本次不改");
+$("send").onclick=()=>{ ta.value.trim() ? toast("开始创作（demo 不实际生成）") : ta.focus(); };
+ta.addEventListener("input",()=>{ caret=ta.selectionStart; clearSel(); sync(); });
+["select","keyup","mouseup","focus"].forEach(ev=>ta.addEventListener(ev,()=>{ readSel(); sync(); }));
+document.addEventListener("selectionchange",()=>{ if(document.activeElement===ta){ readSel(); sync(); } });
+document.addEventListener("click",e=>{
+  if(selbar.contains(e.target)) return;
+  modeMenu.classList.remove("show"); savedPanel.classList.remove("show");
+});
+$("noteHd").onclick=()=>{
+  const n=$("note"); n.classList.toggle("fold");
+  n.querySelector("span").textContent = n.classList.contains("fold") ? "展开" : "收起";
+};
+
+$("grid").innerHTML = GAMES.map(g=>
+  `<div class="card" style="background:${g[1]}"><div class="nm">${g[0]}</div></div>`).join("");
+
+renderIdeas(); renderSaved(); sync();
+</script>
+</body>
+</html>

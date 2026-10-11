@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "aboutTitle": "柴荷 / He Chai",
+  "aboutBody": "清华大学美术学院视觉传达设计本科生，GPA 3.93/4.0，专业排名第 2。\n\n我是一名产品经理、游戏策划和视觉设计师，关注 AI 创作、游戏体验与复杂系统如何被讲清楚、做出来。\n\n目前在腾讯 IEG 游戏事业群实习，负责造化工坊的创作入口、提示词策略、灵感推荐、技能收藏与创作等待态体验。",
+  "articlesLead": "个人经历",
+  "articles": [
+    {"title":"腾讯 IEG · 造化工坊 AI 产品策划 · 2026.07—至今","description":"参与创作入口与创作者体验，负责提示词 AI 优化、灵感推荐、技能收藏、等待态和游戏库搜索体验。","url":"https://zaohua.qq.com/home"},
+    {"title":"百度文库 · AI 产品经理 · 2026.03—2026.07","description":"参与 AI 课件评测 Skill、文库 APP 个人页改版，以及 AI 内容生成与质量优化。","url":"assets/baidu-ai.pdf"},
+    {"title":"泡漫 AI 短剧 · 产品经理 · 2025.11—2026.03","description":"跟进专业创作模式、成片编辑、用户反馈和会员订阅落地，输出 PRD 与可交互原型。","url":"https://www.popreels.cn/"},
+    {"title":"快手 · AIGC 视觉实习 · 2024.12—2025.04","description":"将品牌 IP 拆解为可复用 Prompt，服务理想家、快聘等业务，AIGC 工作流让海报出图效率提升约 7 倍。","url":""},
+    {"title":"Algaetopia · 黑客松项目负责人","description":"负责未来虚拟城市建造管理游戏的世界观、玩家链路、系统信息架构与高保真交互原型。获 MUSE 设计奖银奖、伦敦设计奖银奖等 8 项奖项。","url":"https://furinayu.github.io/algaetopia/"},
+    {"title":"舟山水资源网站 · 产品与视觉设计","description":"围绕水务信息展示、数据层级和大屏场景完成网站与视觉系统设计。","url":""}
+  ],
+  "videosPdfUrl": "assets/ai-product-portfolio.pdf",
+  "videosPdfLabel": "柴荷 · AI 产品经理作品集",
+  "videos": [
+    {"title":"腾讯造化工坊 · 创作入口","url":"assets/round2/zaohua-product.mp4","description":"AI 创作平台 / 创作入口与灵感功能","thumbnail":"assets/zaohua-general-thumb.png","actions":[{"label":"官网链接","url":"https://zaohua.qq.com/home"},{"label":"输入框优化","url":"detail.html?title=造化输入框优化&src=assets/detail/zaohua-prompt.html&type=iframe"},{"label":"搜索框优化","url":"detail.html?title=造化搜索框优化&src=assets/detail/zaohua-search.html&type=iframe"},{"label":"侧边栏优化","url":"detail.html?title=造化侧边栏优化&src=assets/detail/zaohua-sidebar.html&type=iframe"},{"label":"主KV方案","url":"detail.html?title=造化主KV方案&src=assets/zaohua-general.pdf&type=pdf"}]},
+    {"title":"百度文库 · AI 内容生成与质量优化","url":"assets/round2/baidu-product.mp4","description":"AI 内容生成、互动课件和质量评测体验","thumbnail":"assets/baidu-ai-thumb.png","actions":[{"label":"互动课件","url":"https://mp.weixin.qq.com/s/9s0bQjAAPYpL2t_qVay73A"},{"label":"评测工作","url":"detail.html?title=百度 AI 评测工作&src=assets/baidu-ai.pdf&type=pdf"},{"label":"优质课件案例","url":"https://pan.baidu.com/comps/easy/activity/NV8xMl9kXzQ5XzBfMF8wXzBfMA?from=ai_lesson_web"},{"label":"AI命理","url":"https://mp.weixinbridge.com/mp/wapredirect?url=https%3A%2F%2Fwk.baidu.com%2FndWapRouter%2Fbrowse%2FaiNumerology%3Ftab%3Dbazi%26wkFrom%3DweixinGZH"}]},
+    {"title":"泡漫 AI 短剧","url":"assets/round2/paoman-product.mp4","description":"AI 短剧创作、成片编辑与商业化产品体验","thumbnail":"assets/project-image-1.png","actions":[{"label":"官网链接","url":"https://www.popreels.cn/"},{"label":"创作工作流","url":"detail.html?title=泡漫创作工作流&src=assets/detail/paoman-workflow.html&type=iframe"},{"label":"会员订阅","url":"detail.html?title=泡漫会员订阅&src=assets/detail/paoman-membership.html&type=iframe"},{"label":"竞品调研","url":"detail.html?title=泡漫竞品调研&src=assets/detail/paoman-research.html&type=iframe"},{"label":"AI演员","url":"detail.html?title=泡漫 AI 演员&src=assets/detail/paoman-case.pdf&type=pdf"}]},
+    {"title":"Algaetopia · 藻托邦游戏 AI 视频","url":"assets/algaetopia-ai.mp4","description":"游戏策划 / 产品交互 / AI 概念影片","thumbnail":"assets/algeatopia-01.png","portfolioUrl":"detail.html?title=Algaetopia 作品集&src=assets/algaetopia-portfolio.pdf&type=pdf","trialUrl":"https://furinayu.github.io/algaetopia/"},
+    {"title":"Scriben AI · AI 智能录音笔","url":"https://scriben.ai/product#shop","description":"联合创始人 / Founding Designer / 品牌与产品设计","thumbnail":"assets/round2/scriben-ui.png"},
+    {"title":"舟山水资源网站 · 产品与设计","url":"assets/round2/zhoushan-cover.png","mediaType":"image","description":"信息架构、数据可视化与水务网站视觉设计","thumbnail":"assets/round2/zhoushan-cover.png","actions":[{"label":"产品页面","url":"detail.html?title=舟山水资源调度系统&src=assets/round2/zhoushan-dashboard.png&type=image"},{"label":"设计逻辑","url":"detail.html?title=舟山水务设计逻辑&src=assets/round2/zhoushan-detail.png&type=image"},{"label":"更多页面","url":"detail.html?title=舟山水资源网站页面&src=assets/round2/zhoushan-screen-1.png|assets/round2/zhoushan-screen-2.png|assets/round2/zhoushan-screen-3.png&type=gallery"}]}
+  ],
+  "images": [
+    {"url":"assets/round2/design-cover.png","caption":"柴荷 · 视觉设计作品集","link":"detail.html?title=视觉设计作品集&src=assets/round2/design-cover.png&type=image"},
+    {"url":"assets/zaohua-general-thumb.png","caption":"造化工坊 · UIUX 设计稿","link":"detail.html?title=造化工坊 UIUX 设计&images=assets/detail/inspiration-ui.png|assets/detail/home-ui.png&type=gallery"},
+    {"url":"assets/algeatopia-01.png","caption":"Algaetopia · Spatial Product Design","link":"https://furinayu.github.io/algaetopia/"},
+    {"url":"assets/round2/beijing-cover.png","caption":"北京汽车 · 产品与视觉设计","link":"detail.html?title=北京汽车设计作品&src=assets/round2/design-cover.png&type=image"},
+    {"url":"assets/project-image-1.png","caption":"AI 创作平台 · 产品体验"},
+    {"url":"assets/round2/scriben-ui.png","caption":"Scriben AI · Inside the app","link":"https://scriben.ai/product#shop"}
+  ],
+  "apps": [
+    {"title":"简历 Resume","description":"清华大学视觉传达设计 · 产品经理 / 游戏策划","url":"assets/resume.pdf"},
+    {"title":"设计作品集","description":"视觉设计、品牌与交互作品","url":"assets/detail/design-portfolio.pdf"},
+    {"title":"AI 产品案例","description":"AI 产品经理作品集","url":"assets/ai-product-portfolio.pdf"},
+    {"title":"联系邮箱","description":"2832384493@qq.com","url":"mailto:2832384493@qq.com"}
+  ]
+}

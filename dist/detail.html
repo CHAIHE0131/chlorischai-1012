@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chlorischai · Project detail</title>
+  <style>
+    :root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;color:#eaf0ff;background:#151a23}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 10%,#31466c 0,#171c27 38%,#0d1118 100%)}
+    .detail-bar{height:58px;display:flex;align-items:center;gap:18px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.17);background:rgba(18,24,34,.66);backdrop-filter:blur(24px);position:sticky;top:0;z-index:3}
+    .back{appearance:none;border:1px solid rgba(255,255,255,.26);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit}.back:hover{background:rgba(157,187,255,.3)}
+    .detail-title{font-weight:650;letter-spacing:.02em}.detail-main{width:min(1280px,calc(100% - 40px));margin:24px auto 60px}.detail-frame{min-height:calc(100vh - 150px);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.22);background:rgba(240,244,252,.9);box-shadow:0 24px 60px rgba(0,0,0,.28)}iframe,.pdf-frame{width:100%;height:calc(100vh - 150px);border:0;display:block;background:#fff}.media{width:100%;max-height:calc(100vh - 150px);object-fit:contain;display:block;background:#090d14}.detail-note{padding:22px;color:#1a2642;background:rgba(248,250,253,.94);line-height:1.7}.gallery{display:grid;gap:20px;padding:20px;background:#f4f6fb}.gallery img{display:block;width:100%;border-radius:12px;box-shadow:0 10px 28px rgba(20,32,59,.15)}
+  </style>
+</head>
+<body>
+  <header class="detail-bar"><button class="back" type="button" id="back">← 返回 Product</button><span class="detail-title" id="title">Project detail</span><button class="back" type="button" id="fullscreen" hidden>全屏查看</button></header>
+  <main class="detail-main"><div class="detail-frame" id="content"></div></main>
+  <script>
+    const q=new URLSearchParams(location.search), title=q.get('title')||'Project detail', src=q.get('src')||'', type=q.get('type')||'';
+    document.title='Chlorischai · '+title; document.getElementById('title').textContent=title;
+    document.getElementById('back').addEventListener('click',()=>{
+      const returnUrl='index.html#window-video';
+      if(window.opener && !window.opener.closed){
+        try{window.opener.location.href=returnUrl;window.opener.focus();window.close();return;}catch(e){}
+      }
+      location.href=returnUrl;
+    });
+    const root=document.getElementById('content');
+    if(type==='video') root.innerHTML='<video class="media" controls autoplay playsinline src="'+src+'"></video>';
+    else if(type==='image') { root.innerHTML='<img class="media" src="'+src+'" alt="'+title+'" />'; const fs=document.getElementById('fullscreen'); fs.hidden=false; fs.addEventListener('click',()=>{if(root.requestFullscreen) root.requestFullscreen();}); }
+    else if(type==='gallery') { const list=(q.get('images')||'').split('|').filter(Boolean); root.className='gallery'; root.innerHTML=list.map(s=>'<img src="'+s+'" alt="'+title+'" />').join(''); }
+    else if(type==='pptx') root.innerHTML='<div class="detail-note">该方案为 PowerPoint 文件，请点击下方按钮打开。</div><div class="detail-note"><a href="'+src+'" target="_blank" rel="noopener" style="color:#2854c5">打开主 KV 方案 ↗</a></div>';
+    else if(src) root.innerHTML='<iframe title="'+title+'" src="'+src+'"></iframe>';
+    else root.innerHTML='<div class="detail-note">暂无可预览内容。</div>';
+  </script>
+</body>
+</html>

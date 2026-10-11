@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>片段编辑-资产确认3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#1a1a2e;color:#fff;min-height:100vh;overflow:hidden}
+
+/* 顶部导航 */
+.top-nav{display:flex;align-items:center;padding:10px 20px;background:#16162a;border-bottom:1px solid #2a2a4a;height:48px}
+.nav-left{display:flex;align-items:center;gap:10px}
+.close-btn{width:28px;height:28px;border-radius:50%;border:1px solid #444;background:transparent;color:#999;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.nav-icon{color:#4ecdc4;font-size:14px}
+.nav-title{color:#4ecdc4;font-size:14px;font-weight:600}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.nav-right .label{color:#999;font-size:13px}
+.nav-right .coins{color:#f0c040;font-size:13px}
+.nav-right .coins::before{content:'● ';font-size:8px}
+.step-btn{background:transparent;border:1px solid #555;color:#ccc;padding:5px 16px;border-radius:4px;cursor:pointer;font-size:13px}
+.export-btn{background:#4ecdc4;color:#000;border:none;padding:5px 16px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600}
+
+.main{display:flex;height:calc(100vh - 48px)}
+
+.left-panel{width:280px;background:#12122a;border-right:1px solid #2a2a4a;display:flex;flex-direction:column;overflow:hidden}
+.left-header{padding:12px 16px;font-size:13px;color:#999;border-bottom:1px solid #2a2a4a;display:flex;align-items:center;gap:6px}
+.clip-list{flex:1;overflow-y:auto;padding:8px}
+.clip-item{display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;margin-bottom:6px;transition:background .2s}
+.clip-item:hover,.clip-item.active{background:#1e1e3a}
+.clip-thumb{width:48px;height:48px;border-radius:6px;background:#2a2a3a;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.clip-thumb .play-icon{color:#888;font-size:14px}
+.clip-info{flex:1;min-width:0}
+.clip-info .clip-title{font-size:13px;font-weight:600;margin-bottom:3px;color:#ddd}
+.clip-info .clip-desc{font-size:11px;color:#777;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+
+.center-panel{flex:1;display:flex;flex-direction:column;position:relative}
+.center-content{flex:1;display:flex;align-items:center;justify-content:center}
+.bottom-bar{padding:10px 20px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between;background:#16162a}
+.bottom-left{display:flex;align-items:center;gap:10px}
+.play-btn{width:36px;height:36px;border-radius:50%;background:#2a2a4a;border:1px solid #3a3a5a;color:#ccc;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.bottom-center{color:#666;font-size:12px}
+.bottom-right{display:flex;align-items:center;gap:12px}
+.model-tag{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:4px;padding:4px 10px;color:#ccc;font-size:12px}
+.duration-tag{font-size:12px;color:#888}
+.gen-btn{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;border:none;padding:8px 28px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+
+.right-panel{width:280px;background:#12122a;border-left:1px solid #2a2a4a;display:flex;flex-direction:column;overflow-y:auto}
+.right-tabs{display:flex;padding:12px 16px 0;gap:16px;border-bottom:1px solid #2a2a4a}
+.right-tab{font-size:13px;color:#888;cursor:pointer;padding-bottom:10px;border-bottom:2px solid transparent}
+.right-tab.active{color:#4ecdc4;border-bottom-color:#4ecdc4}
+.right-content{flex:1;padding:16px;overflow-y:auto}
+
+.section-title{font-size:13px;color:#999;margin-bottom:10px}
+.character-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.char-item{text-align:center;cursor:pointer}
+.char-avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid transparent;margin-bottom:4px}
+.char-avatar img{width:100%;height:100%;object-fit:cover}
+.char-item.selected .char-avatar{border-color:#4ecdc4}
+.char-name{font-size:11px;color:#ccc}
+.char-add{width:56px;height:56px;border-radius:50%;border:1px dashed #555;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px;cursor:pointer}
+.char-add:hover{border-color:#4ecdc4;color:#4ecdc4}
+
+.scene-row{display:flex;gap:10px;margin-bottom:6px;align-items:center}
+.scene-thumb{width:72px;height:52px;border-radius:6px;overflow:hidden;border:2px solid #4ecdc4;cursor:pointer}
+.scene-thumb img{width:100%;height:100%;object-fit:cover}
+.scene-add{width:52px;height:52px;border-radius:6px;border:1px dashed #555;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px;cursor:pointer;flex-shrink:0}
+.scene-add:hover{border-color:#4ecdc4;color:#4ecdc4}
+.scene-label{font-size:12px;color:#ccc;margin-bottom:16px}
+
+.prop-section{margin-top:4px}
+.prop-row{display:flex;gap:10px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.prop-thumb-wrap{position:relative;display:inline-block}
+.prop-thumb{width:72px;height:52px;border-radius:6px;overflow:hidden;border:2px solid transparent;cursor:pointer}
+.prop-thumb.selected{border-color:#4ecdc4}
+.prop-thumb img{width:100%;height:100%;object-fit:cover}
+.prop-delete{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#ff4757;border:2px solid #12122a;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;opacity:0;transition:opacity .2s;line-height:1}
+.prop-thumb-wrap:hover .prop-delete{opacity:1}
+.prop-add{width:52px;height:52px;border-radius:6px;border:1px dashed #555;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px;cursor:pointer;flex-shrink:0}
+.prop-add:hover{border-color:#4ecdc4;color:#4ecdc4}
+.prop-label{font-size:12px;color:#ccc;margin-bottom:16px}
+
+.prompt-section{margin-top:4px}
+.prompt-label{font-size:13px;color:#999;margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.prompt-label .info{width:14px;height:14px;border-radius:50%;border:1px solid #666;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#666}
+.prompt-text{font-size:12px;color:#aaa;line-height:1.7;margin-bottom:16px}
+.bgm-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#1e1e3a;border-radius:6px}
+.bgm-icon{width:28px;height:28px;border-radius:50%;background:#2a2a4a;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px}
+.bgm-text{font-size:12px;color:#999}
+.bgm-arrow{margin-left:auto;color:#666;font-size:12px}
+
+.float-btn{position:fixed;bottom:80px;right:296px;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f0c040,#e0a020);border:none;color:#000;font-size:16px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,64,.3);z-index:50;display:flex;align-items:center;justify-content:center}
+
+/* ===== 出镜道具弹窗 ===== */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.apm{background:#1e1e3a;border-radius:12px;width:640px;max-height:80vh;display:flex;flex-direction:column}
+.apm-header{display:flex;align-items:center;padding:20px 24px 16px;gap:12px}
+.apm-header h3{font-size:16px;font-weight:600;white-space:nowrap}
+.apm-header .add-prop-btn{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:6px 14px;color:#ccc;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.apm-header .add-prop-btn:hover{border-color:#4ecdc4;color:#4ecdc4}
+.apm-close{width:28px;height:28px;border-radius:50%;border:1px solid #555;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0}
+.apm-body{flex:1;padding:0 24px 16px;overflow-y:auto}
+.apm-group{margin-bottom:20px}
+.apm-group-title{font-size:14px;color:#ccc;margin-bottom:12px;font-weight:600}
+.apm-grid{display:flex;gap:12px;flex-wrap:wrap}
+.apm-card{width:120px;position:relative;cursor:pointer}
+.apm-card-img{width:120px;height:88px;border-radius:8px;overflow:hidden;border:2px solid transparent;background:#2a2a4a;position:relative}
+.apm-card-img img{width:100%;height:100%;object-fit:cover}
+.apm-card.selected .apm-card-img{border-color:#4ecdc4}
+.apm-card .check{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;z-index:2}
+.apm-card.selected .check{background:#4ecdc4;border-color:#4ecdc4;color:#000}
+.apm-card-label{font-size:11px;color:#999;text-align:center;margin-top:4px}
+.apm-add-card{width:120px;height:88px;border-radius:8px;border:1px dashed #555;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:#888;font-size:12px;transition:all .2s}
+.apm-add-card:hover{border-color:#4ecdc4;color:#4ecdc4}
+.apm-add-card .plus{font-size:22px;line-height:1}
+.apm-footer{padding:16px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between}
+.apm-footer-left{display:flex;align-items:center;gap:8px;color:#999;font-size:13px}
+.sel-thumbs{display:flex;gap:4px}
+.sel-thumb{width:32px;height:32px;border-radius:4px;overflow:hidden;border:1px solid #3a3a5a}
+.sel-thumb img{width:100%;height:100%;object-fit:cover}
+.apm-footer-right{display:flex;gap:10px}
+.apm-btn{padding:8px 24px;border-radius:6px;font-size:13px;cursor:pointer;border:none}
+.apm-cancel{background:#2a2a4a;color:#ccc;border:1px solid #3a3a5a}
+.apm-confirm{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;font-weight:600}
+
+/* ===== 新增道具全屏页面（参考新增场景） ===== */
+.newprop-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a2e;z-index:200;flex-direction:column}
+.newprop-overlay.show{display:flex}
+.np-topbar{display:flex;align-items:center;padding:14px 24px;border-bottom:1px solid #2a2a4a;background:#16162a}
+.np-topbar .np-close{width:32px;height:32px;border-radius:50%;border:1px solid #444;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-right:16px}
+.np-topbar h2{font-size:15px;font-weight:600;color:#fff}
+.np-main{flex:1;display:flex;overflow:hidden}
+.np-left{flex:1;display:flex;flex-direction:column;padding:20px 24px;overflow:hidden}
+.np-left-subtitle{font-size:13px;color:#ccc;margin-bottom:16px}
+.np-preview{flex:1;background:#222240;border-radius:10px;border:1px solid #2a2a4a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;position:relative}
+.np-preview .待生成{display:flex;flex-direction:column;align-items:center;gap:8px;color:#666}
+.np-preview .待生成 .icon{font-size:36px;opacity:.5}
+.np-preview .待生成 .text{font-size:13px}
+.np-right{width:340px;border-left:1px solid #2a2a4a;padding:20px 24px;display:flex;flex-direction:column;overflow-y:auto}
+.np-right .np-section-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:10px}
+.np-right .np-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.np-right .np-tag{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:6px 14px;color:#ccc;font-size:13px;cursor:pointer}
+.np-right .np-tag.active{border-color:#4ecdc4;color:#4ecdc4}
+.np-right .np-add-tag{width:56px;height:56px;border-radius:8px;border:1px dashed #555;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#888;font-size:12px;cursor:pointer;gap:2px}
+.np-right .np-add-tag:hover{border-color:#4ecdc4;color:#4ecdc4}
+.np-right .np-add-tag .plus{font-size:18px;line-height:1}
+.np-ref-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:10px;margin-top:8px}
+.np-ref-row{display:flex;gap:10px;margin-bottom:20px;align-items:flex-start}
+.np-ref-thumb{width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #3a3a5a;cursor:pointer}
+.np-ref-thumb img{width:100%;height:100%;object-fit:cover}
+.np-ref-thumb-main{width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #3a3a5a;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;background:#2a2a4a}
+.np-ref-thumb-main img{width:100%;height:100%;object-fit:cover}
+.np-ref-thumb-main .tag{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);text-align:center;font-size:9px;color:#ccc;padding:2px 0}
+.np-prompt-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:8px}
+.np-prompt-area{display:flex;gap:10px;margin-bottom:6px}
+.np-prompt-textarea{flex:1;background:#2a2a4a;border:1px solid #3a3a5a;border-radius:8px;padding:12px;color:#aaa;font-size:13px;resize:none;min-height:160px;outline:none;line-height:1.6}
+.np-prompt-textarea:focus{border-color:#4ecdc4;color:#fff}
+.np-prompt-upload{width:48px;height:48px;border-radius:8px;border:1px solid #3a3a5a;background:#2a2a4a;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#888;font-size:20px;flex-shrink:0}
+.np-prompt-upload:hover{border-color:#4ecdc4;color:#4ecdc4}
+.np-char-count{text-align:right;font-size:11px;color:#666;margin-bottom:16px}
+.np-model-label{font-size:14px;color:#fff;font-weight:600;margin-bottom:8px}
+.np-model-select{width:100%;background:#2a2a4a;border:1px solid #3a3a5a;border-radius:8px;padding:10px 14px;color:#ccc;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.np-model-select .coin{color:#f0c040;font-size:12px;margin-left:6px}
+.np-generate-btn{width:100%;background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;border:none;padding:12px 0;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.np-generate-btn .coin{font-size:13px}
+.np-bottom{padding:12px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;gap:12px;background:#16162a}
+.np-bottom .np-desc{flex:1;font-size:12px;color:#777;line-height:1.5}
+.np-bottom .np-history{display:flex;align-items:center;gap:8px;color:#888;font-size:12px}
+.np-bottom .np-history-icon{width:36px;height:36px;border-radius:8px;background:#2a2a4a;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+
+/* ===== 添加道具弹窗（参考添加场景弹窗） ===== */
+.addprop-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center}
+.addprop-overlay.show{display:flex}
+.addprop-modal{background:#1e1e3a;border-radius:12px;width:820px;height:620px;display:flex;flex-direction:column;position:relative}
+.ap-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px}
+.ap-header h3{font-size:16px;font-weight:600}
+.ap-header .ap-close{width:28px;height:28px;border-radius:50%;border:1px solid #555;background:transparent;color:#999;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ap-toolbar{display:flex;align-items:center;justify-content:flex-end;padding:0 24px 12px;gap:12px}
+.ap-search{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:8px 14px;color:#fff;font-size:13px;outline:none;width:200px}
+.ap-search:focus{border-color:#4ecdc4}
+.ap-filter-btn{background:#2a2a4a;border:1px solid #3a3a5a;border-radius:6px;padding:8px 16px;color:#ccc;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ap-body{flex:1;padding:0 24px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start}
+.ap-item{width:120px;cursor:pointer;position:relative}
+.ap-item-img{width:120px;height:88px;border-radius:8px;overflow:hidden;border:2px solid transparent;background:#2a2a4a}
+.ap-item-img img{width:100%;height:100%;object-fit:cover}
+.ap-item.selected .ap-item-img{border-color:#4ecdc4}
+.ap-item .ap-check{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;z-index:2}
+.ap-item.selected .ap-check{background:#4ecdc4;border-color:#4ecdc4;color:#000}
+.ap-item-label{font-size:11px;color:#999;text-align:center;margin-top:4px}
+.ap-empty{width:100%;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;padding:60px 0}
+.ap-footer{padding:16px 24px;border-top:1px solid #2a2a4a;display:flex;align-items:center;justify-content:space-between}
+.ap-footer-left{display:flex;align-items:center;gap:8px;color:#999;font-size:13px}
+.ap-footer-left .ap-sel-thumbs{display:flex;gap:4px}
+.ap-footer-left .ap-sel-thumb{width:32px;height:32px;border-radius:4px;overflow:hidden;border:1px solid #3a3a5a}
+.ap-footer-left .ap-sel-thumb img{width:100%;height:100%;object-fit:cover}
+.ap-footer-right{display:flex;gap:10px}
+.ap-fbtn{padding:8px 24px;border-radius:6px;font-size:13px;cursor:pointer;border:none}
+.ap-fcancel{background:#2a2a4a;color:#ccc;border:1px solid #3a3a5a}
+.ap-fconfirm{background:linear-gradient(135deg,#4ecdc4,#44b4aa);color:#000;font-weight:600}
+
+.hidden-file{display:none}
+</style>
+</head>
+<body>
+<input type="file" class="hidden-file" id="localFileInput" accept="image/*" multiple>
+
+<div class="top-nav">
+  <div class="nav-left">
+    <button class="close-btn">&times;</button>
+    <span class="nav-icon">···</span>
+    <span class="nav-title">片段编辑</span>
+  </div>
+  <div class="nav-right">
+    <span class="label">余额</span>
+    <span class="coins">198964</span>
+    <button class="step-btn">上一步</button>
+    <button class="export-btn">导出剧照格式</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left-panel">
+    <div class="left-header">⊞ 第1集</div>
+    <div class="clip-list">
+      <div class="clip-item active">
+        <div class="clip-thumb"><span class="play-icon">▶</span></div>
+        <div class="clip-info">
+          <div class="clip-title">片段-1</div>
+          <div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜固定镜头 俯拍｜固定画面灯光亮、光线充足、柔光滤镜。一尘子垂着双眼注视面前的古筝，琴音悠扬的同时，七根琴弦闪闪发光微微振动…</div>
+        </div>
+      </div>
+      <div class="clip-item">
+        <div class="clip-thumb"><span class="play-icon">▶</span></div>
+        <div class="clip-info"><div class="clip-title">片段-2</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜近景 平拍｜手持｜暖黄灯灯光亮，柔光…</div></div>
+      </div>
+      <div class="clip-item">
+        <div class="clip-thumb"><span class="play-icon">▶</span></div>
+        <div class="clip-info"><div class="clip-title">片段-3</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜中景 平拍｜水平横移｜暖黄灯灯光亮…</div></div>
+      </div>
+      <div class="clip-item">
+        <div class="clip-thumb"><span class="play-icon">▶</span></div>
+        <div class="clip-info"><div class="clip-title">片段-4</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜中景 仰拍｜镜头推移｜暖黄灯灯光亮…</div></div>
+      </div>
+      <div class="clip-item">
+        <div class="clip-thumb"><span class="play-icon">▶</span></div>
+        <div class="clip-info"><div class="clip-title">片段-5</div><div class="clip-desc">镜号：1｜场次：日/内/沈家宴会厅｜0-4s｜中景 平拍｜手持｜暖黄灯灯光亮，柔光…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="center-panel">
+    <div class="center-content"></div>
+    <div class="bottom-bar">
+      <div class="bottom-left"><button class="play-btn">▶</button></div>
+      <div class="bottom-center">历史记录 History ···</div>
+      <div class="bottom-right">
+        <span class="model-tag">PopoMeta2.0 <span style="color:#f0c040">2156/次</span></span>
+        <span class="duration-tag">15s</span>
+        <button class="gen-btn">生视频 ● 215 ◷</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="right-tabs">
+      <div class="right-tab active">多参生视频</div>
+      <div class="right-tab">多参生图</div>
+      <div class="right-tab">配音</div>
+    </div>
+    <div class="right-content">
+      <div class="section-title">角色 Character</div>
+      <div class="character-grid">
+        <div class="char-item selected">
+          <div class="char-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23334455' width='56' height='56'/%3E%3Ccircle cx='28' cy='20' r='10' fill='%23556677'/%3E%3Cellipse cx='28' cy='44' rx='16' ry='12' fill='%23556677'/%3E%3C/svg%3E" alt=""></div>
+          <div class="char-name">沈瑜</div>
+        </div>
+        <div class="char-item">
+          <div class="char-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23443344' width='56' height='56'/%3E%3Ccircle cx='28' cy='20' r='10' fill='%23665566'/%3E%3Cellipse cx='28' cy='44' rx='16' ry='12' fill='%23665566'/%3E%3C/svg%3E" alt=""></div>
+          <div class="char-name">沈璋</div>
+        </div>
+        <div class="char-item">
+          <div class="char-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23334433' width='56' height='56'/%3E%3Ccircle cx='28' cy='20' r='10' fill='%23556655'/%3E%3Cellipse cx='28' cy='44' rx='16' ry='12' fill='%23556655'/%3E%3C/svg%3E" alt=""></div>
+          <div class="char-name">世家公子</div>
+        </div>
+        <div class="char-add">+</div>
+      </div>
+
+      <div class="section-title">场景 Scene</div>
+      <div class="scene-row">
+        <div class="scene-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='104'%3E%3Cdefs%3E%3ClinearGradient id='s1' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23553322'/%3E%3Cstop offset='1' stop-color='%23332211'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23s1)' width='144' height='104'/%3E%3Crect x='20' y='20' width='40' height='60' rx='4' fill='%23664422' opacity='.5'/%3E%3Crect x='80' y='30' width='44' height='50' rx='4' fill='%23664422' opacity='.4'/%3E%3C/svg%3E" alt="沈家宴会厅"></div>
+        <div class="scene-add">→</div>
+      </div>
+      <div class="scene-label">沈家宴会厅</div>
+
+      <div class="prop-section" id="propSection">
+        <div class="section-title">道具 Props</div>
+        <div class="prop-row" id="propRow">
+          <div class="prop-thumb-wrap" data-name="青锋剑">
+            <button class="prop-delete" onclick="deleteProp(this)" title="删除道具">&times;</button>
+            <div class="prop-thumb selected" onclick="selectProp(this)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='104'%3E%3Cdefs%3E%3ClinearGradient id='p1' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23553322'/%3E%3Cstop offset='1' stop-color='%23332211'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23p1)' width='144' height='104'/%3E%3Crect x='65' y='10' width='6' height='60' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='73' y='10' width='6' height='60' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='58' y='66' width='28' height='12' rx='3' fill='%23664422'/%3E%3Ctext x='72' y='96' text-anchor='middle' fill='%23ccaa88' font-size='10'%3E青锋剑%3C/text%3E%3C/svg%3E" alt="青锋剑"></div>
+          </div>
+          <div class="prop-thumb-wrap" data-name="龙纹玉佩">
+            <button class="prop-delete" onclick="deleteProp(this)" title="删除道具">&times;</button>
+            <div class="prop-thumb" onclick="selectProp(this)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='104'%3E%3Cdefs%3E%3ClinearGradient id='p2' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23442233'/%3E%3Cstop offset='1' stop-color='%23221122'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23p2)' width='144' height='104'/%3E%3Ccircle cx='72' cy='44' r='22' fill='%23553344' opacity='.6'/%3E%3Ccircle cx='72' cy='44' r='10' fill='%23cc8866' opacity='.8'/%3E%3Ctext x='72' y='90' text-anchor='middle' fill='%23cc99aa' font-size='10'%3E龙纹玉佩%3C/text%3E%3C/svg%3E" alt="龙纹玉佩"></div>
+          </div>
+          <div class="prop-add" onclick="openAddPropModal()">+</div>
+        </div>
+        <div class="prop-label" id="propLabel">青锋剑</div>
+      </div>
+
+      <div class="prompt-section">
+        <div class="prompt-label">提示词 Prompt <span class="info">i</span></div>
+        <div class="prompt-text">分镜序号:1，板面画具器、俯拍、固定镜头人，沈家宴会厅，男人的手指轻抚过古琴，琴音悦耳，琴宝偏斜，七根琴弦闪耀闪闪轻微振动，台词：为给他和出气，只长在那就艺术走是置重了我的梦。分镜序号:2，近景，平拍、镜头偏稳、沈家宴会厅，女人后台坐拍、苍脸上的细倔、手指扶琴的姿势，高沁口轻，台词：琴音直是然然的，七玄倔拍，分惜序号:3，全景、俯拍，水平横移，沈家宴会厅，宾客交义楼瑞，且光灯雷散自，有人用折诗描晴亮发。台词：满座宾客选择距离</div>
+        <div class="bgm-row">
+          <div class="bgm-icon">♪</div>
+          <div class="bgm-text">无影调</div>
+          <div class="bgm-arrow">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="float-btn">?</button>
+
+<!-- ===== 第1层：出镜道具弹窗 ===== -->
+<div class="modal-overlay" id="addPropModal">
+  <div class="apm">
+    <div class="apm-header">
+      <h3 id="apmTitle">出镜道具（2/3）</h3>
+      <button class="add-prop-btn" onclick="openNewPropPage()">+ 添加道具</button>
+      <button class="apm-close" onclick="closeAddPropModal()">&times;</button>
+    </div>
+    <div class="apm-body">
+      <div class="apm-group">
+        <div class="apm-group-title">青锋剑</div>
+        <div class="apm-grid">
+          <div class="apm-card selected" onclick="toggleCard(this)">
+            <div class="check">✓</div>
+            <div class="apm-card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Cdefs%3E%3ClinearGradient id='q1' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23553322'/%3E%3Cstop offset='1' stop-color='%23332211'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23q1)' width='240' height='176'/%3E%3Crect x='110' y='20' width='8' height='100' rx='2' fill='%23aabbcc' opacity='.8'/%3E%3Crect x='122' y='20' width='8' height='100' rx='2' fill='%23aabbcc' opacity='.8'/%3E%3Crect x='103' y='115' width='34' height='16' rx='4' fill='%23664422'/%3E%3C/svg%3E" alt="青锋剑"></div>
+            <div class="apm-card-label">主图</div>
+          </div>
+          <div class="apm-add-card" onclick="openNewPropPageFor('青锋剑')"><span class="plus">+</span><span>新增道具</span></div>
+        </div>
+      </div>
+      <div class="apm-group">
+        <div class="apm-group-title">龙纹玉佩</div>
+        <div class="apm-grid">
+          <div class="apm-card selected" onclick="toggleCard(this)">
+            <div class="check">✓</div>
+            <div class="apm-card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Cdefs%3E%3ClinearGradient id='q2' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23442233'/%3E%3Cstop offset='1' stop-color='%23221122'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23q2)' width='240' height='176'/%3E%3Ccircle cx='120' cy='80' r='36' fill='%23553344' opacity='.6'/%3E%3Ccircle cx='120' cy='80' r='16' fill='%23cc8866' opacity='.8'/%3E%3C/svg%3E" alt="龙纹玉佩"></div>
+            <div class="apm-card-label">主图</div>
+          </div>
+          <div class="apm-add-card" onclick="openNewPropPageFor('龙纹玉佩')"><span class="plus">+</span><span>新增道具</span></div>
+        </div>
+      </div>
+      <div class="apm-group">
+        <div class="apm-group-title">密信</div>
+        <div class="apm-grid">
+          <div class="apm-card" onclick="toggleCard(this)">
+            <div class="check">✓</div>
+            <div class="apm-card-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Cdefs%3E%3ClinearGradient id='q3' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23224433'/%3E%3Cstop offset='1' stop-color='%23112222'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23q3)' width='240' height='176'/%3E%3Crect x='70' y='30' width='100' height='110' rx='6' fill='%23335544' opacity='.6'/%3E%3Cline x1='90' y1='65' x2='150' y2='65' stroke='%2388aa88'/%3E%3Cline x1='90' y1='85' x2='145' y2='85' stroke='%2388aa88'/%3E%3Cline x1='90' y1='105' x2='148' y2='105' stroke='%2388aa88'/%3E%3C/svg%3E" alt="密信"></div>
+            <div class="apm-card-label">主图</div>
+          </div>
+          <div class="apm-add-card" onclick="openNewPropPageFor('密信')"><span class="plus">+</span><span>新增道具</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="apm-footer">
+      <div class="apm-footer-left">
+        <span>已选</span>
+        <div class="sel-thumbs" id="selThumbs">
+          <div class="sel-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%23553322' width='64' height='64'/%3E%3Crect x='26' y='8' width='4' height='36' rx='1' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='34' y='8' width='4' height='36' rx='1' fill='%23aabbcc' opacity='.7'/%3E%3C/svg%3E" alt=""></div>
+          <div class="sel-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%23442233' width='64' height='64'/%3E%3Ccircle cx='32' cy='28' r='14' fill='%23553344' opacity='.6'/%3E%3Ccircle cx='32' cy='28' r='6' fill='%23cc8866' opacity='.8'/%3E%3C/svg%3E" alt=""></div>
+        </div>
+      </div>
+      <div class="apm-footer-right">
+        <button class="apm-btn apm-cancel" onclick="closeAddPropModal()">取消</button>
+        <button class="apm-btn apm-confirm" onclick="closeAddPropModal()">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 第2层：新增道具全屏页面（参考新增场景界面） ===== -->
+<div class="newprop-overlay" id="newPropPage">
+  <div class="np-topbar">
+    <button class="np-close" onclick="closeNewPropPage()">&times;</button>
+    <h2>青锋剑</h2>
+  </div>
+  <div class="np-main">
+    <!-- 左侧预览区 -->
+    <div class="np-left">
+      <div class="np-left-subtitle">出镜形象·造型图·青锋剑 -道具1</div>
+      <div class="np-preview">
+        <div class="待生成">
+          <div class="icon">🖼</div>
+          <div class="text">待生成</div>
+        </div>
+      </div>
+    </div>
+    <!-- 右侧配置区 -->
+    <div class="np-right">
+      <!-- 道具 Props -->
+      <div class="np-section-label">道具 Props</div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px">
+        <div class="np-tags">
+          <div class="np-tag active">青锋剑</div>
+          <div class="np-tag">道具1</div>
+        </div>
+        <div class="np-add-tag" onclick="openAddPropLibModal()">
+          <span class="plus">+</span>
+          <span>添加</span>
+        </div>
+      </div>
+
+      <!-- 主道具垫图 Image Reference -->
+      <div class="np-ref-label">主道具垫图 Image Reference</div>
+      <div class="np-ref-row">
+        <div class="np-ref-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cdefs%3E%3ClinearGradient id='r1' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23553322'/%3E%3Cstop offset='1' stop-color='%23332211'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23r1)' width='128' height='128'/%3E%3Crect x='56' y='10' width='6' height='70' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='66' y='10' width='6' height='70' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='50' y='76' width='28' height='14' rx='3' fill='%23664422'/%3E%3C/svg%3E" alt="青锋剑"></div>
+        <div style="flex:1"></div>
+        <div class="np-ref-thumb-main">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cdefs%3E%3ClinearGradient id='r2' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23553322'/%3E%3Cstop offset='1' stop-color='%23332211'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23r2)' width='128' height='128'/%3E%3Crect x='56' y='10' width='6' height='70' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='66' y='10' width='6' height='70' rx='2' fill='%23aabbcc' opacity='.7'/%3E%3C/svg%3E" alt="">
+          <div class="tag">主道具图</div>
+        </div>
+      </div>
+
+      <!-- 画面提示词 -->
+      <div class="np-prompt-label">画面提示词</div>
+      <div class="np-prompt-area">
+        <textarea class="np-prompt-textarea" placeholder="请输入该道具在不同状态下的提示词，例如请生成该道具某个角度的近景图"></textarea>
+        <div class="np-prompt-upload">🖼</div>
+      </div>
+      <div class="np-char-count">0/800</div>
+
+      <!-- 文生图模型 -->
+      <div class="np-model-label">文生图模型</div>
+      <div class="np-model-select">
+        <span>nano banana pro <span class="coin">● 21/张</span></span>
+        <span>▾</span>
+      </div>
+
+      <!-- 生成按钮 -->
+      <button class="np-generate-btn">生成 <span class="coin">● 21</span></button>
+    </div>
+  </div>
+  <div class="np-bottom">
+    <div class="np-desc">道具特写，无人物，画幅16:9，一把古代名剑，剑身修长笔直，剑刃泛着冷冽的青色寒光，剑柄缠绕着深色丝线。Strictly follow the frame instructions and refrain from outputting combined images. 真人风格，真实质，色调清晰，细节真实，符合现实构造。</div>
+    <div class="np-history">
+      <span>历史记录 History</span>
+      <div class="np-history-icon">🖼</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 第3层：添加道具弹窗（参考添加场景弹窗） ===== -->
+<div class="addprop-overlay" id="addPropLibModal">
+  <div class="addprop-modal">
+    <div class="ap-header">
+      <h3>添加道具</h3>
+      <button class="ap-close" onclick="closeAddPropLibModal()">&times;</button>
+    </div>
+    <div class="ap-toolbar">
+      <div class="ap-filter-btn">风格 <span>▼</span></div>
+    </div>
+    <div class="ap-body">
+      <!-- 道具列表 -->
+      <div class="ap-item selected" onclick="toggleApItem(this)">
+        <div class="ap-check">✓</div>
+        <div class="ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Cdefs%3E%3ClinearGradient id='a1' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23553322'/%3E%3Cstop offset='1' stop-color='%23332211'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a1)' width='240' height='176'/%3E%3Crect x='110' y='20' width='8' height='100' rx='2' fill='%23aabbcc' opacity='.8'/%3E%3Crect x='122' y='20' width='8' height='100' rx='2' fill='%23aabbcc' opacity='.8'/%3E%3Crect x='103' y='115' width='34' height='16' rx='4' fill='%23664422'/%3E%3C/svg%3E" alt=""></div>
+        <div class="ap-item-label">青锋剑</div>
+      </div>
+      <div class="ap-item" onclick="toggleApItem(this)">
+        <div class="ap-check">✓</div>
+        <div class="ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Cdefs%3E%3ClinearGradient id='a2' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23442233'/%3E%3Cstop offset='1' stop-color='%23221122'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a2)' width='240' height='176'/%3E%3Ccircle cx='120' cy='80' r='36' fill='%23553344' opacity='.6'/%3E%3Ccircle cx='120' cy='80' r='16' fill='%23cc8866' opacity='.8'/%3E%3C/svg%3E" alt=""></div>
+        <div class="ap-item-label">龙纹玉佩</div>
+      </div>
+      <div class="ap-item" onclick="toggleApItem(this)">
+        <div class="ap-check">✓</div>
+        <div class="ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Cdefs%3E%3ClinearGradient id='a3' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23224433'/%3E%3Cstop offset='1' stop-color='%23112222'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a3)' width='240' height='176'/%3E%3Crect x='70' y='30' width='100' height='110' rx='6' fill='%23335544' opacity='.6'/%3E%3Cline x1='90' y1='65' x2='150' y2='65' stroke='%2388aa88'/%3E%3Cline x1='90' y1='85' x2='145' y2='85' stroke='%2388aa88'/%3E%3C/svg%3E" alt=""></div>
+        <div class="ap-item-label">密信</div>
+      </div>
+      <div class="ap-item" onclick="toggleApItem(this)">
+        <div class="ap-check">✓</div>
+        <div class="ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23223344' width='240' height='176'/%3E%3Ccircle cx='120' cy='70' r='28' fill='%23334455' opacity='.6'/%3E%3Crect x='100' y='110' width='40' height='30' rx='4' fill='%23334455' opacity='.5'/%3E%3C/svg%3E" alt=""></div>
+        <div class="ap-item-label">夜明珠</div>
+      </div>
+      <div class="ap-item" onclick="toggleApItem(this)">
+        <div class="ap-check">✓</div>
+        <div class="ap-item-img"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='176'%3E%3Crect fill='%23332233' width='240' height='176'/%3E%3Crect x='80' y='40' width='80' height='90' rx='6' fill='%23443344' opacity='.6'/%3E%3Ccircle cx='120' cy='70' r='12' fill='%23886644' opacity='.7'/%3E%3C/svg%3E" alt=""></div>
+        <div class="ap-item-label">锦囊</div>
+      </div>
+    </div>
+    <div class="ap-footer">
+      <div class="ap-footer-left">
+        <span>已选</span>
+        <div class="ap-sel-thumbs">
+          <div class="ap-sel-thumb"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%23553322' width='64' height='64'/%3E%3Crect x='26' y='8' width='4' height='36' rx='1' fill='%23aabbcc' opacity='.7'/%3E%3Crect x='34' y='8' width='4' height='36' rx='1' fill='%23aabbcc' opacity='.7'/%3E%3C/svg%3E" alt=""></div>
+        </div>
+      </div>
+      <div class="ap-footer-right">
+        <button class="ap-fbtn ap-fcancel" onclick="closeAddPropLibModal()">取消</button>
+        <button class="ap-fbtn ap-fconfirm" onclick="closeAddPropLibModal()">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 第1层：出镜道具弹窗 */
+function openAddPropModal(){document.getElementById('addPropModal').classList.add('show')}
+function closeAddPropModal(){document.getElementById('addPropModal').classList.remove('show')}
+function toggleCard(el){
+  el.classList.toggle('selected');
+  var sel=document.querySelectorAll('.apm-card.selected').length;
+  var total=document.querySelectorAll('.apm-card').length;
+  document.getElementById('apmTitle').textContent='出镜道具（'+sel+'/'+total+'）';
+}
+
+/* 第2层：新增道具全屏页面 */
+function openNewPropPage(){document.getElementById('newPropPage').classList.add('show')}
+function openNewPropPageFor(name){
+  document.querySelector('.np-topbar h2').textContent=name;
+  document.querySelector('.np-left-subtitle').textContent='出镜形象·造型图·'+name+' -道具1';
+  document.querySelector('.np-tags .np-tag.active').textContent=name;
+  openNewPropPage();
+}
+function closeNewPropPage(){document.getElementById('newPropPage').classList.remove('show')}
+
+/* 第3层：添加道具弹窗 */
+function openAddPropLibModal(){document.getElementById('addPropLibModal').classList.add('show')}
+function closeAddPropLibModal(){document.getElementById('addPropLibModal').classList.remove('show')}
+function toggleApItem(el){el.classList.toggle('selected')}
+
+/* 右侧面板道具操作 */
+function selectProp(el){
+  document.querySelectorAll('.prop-thumb').forEach(function(x){x.classList.remove('selected')});
+  el.classList.add('selected');
+  var name=el.closest('.prop-thumb-wrap').getAttribute('data-name');
+  document.getElementById('propLabel').textContent=name;
+}
+function deleteProp(btn){
+  var wrap=btn.closest('.prop-thumb-wrap');
+  if(confirm('确定删除该道具？')){
+    wrap.remove();
+    var remaining=document.querySelectorAll('.prop-thumb-wrap');
+    if(remaining.length>0){
+      var first=remaining[0];
+      first.querySelector('.prop-thumb').classList.add('selected');
+      document.getElementById('propLabel').textContent=first.getAttribute('data-name');
+    }else{
+      document.getElementById('propLabel').textContent='暂无道具';
+    }
+  }
+}
+
+/* 提示词字数统计 */
+document.querySelector('.np-prompt-textarea').addEventListener('input',function(){
+  document.querySelector('.np-char-count').textContent=this.value.length+'/800';
+});
+
+/* 点击背景关闭弹窗 */
+document.getElementById('addPropModal').addEventListener('click',function(e){if(e.target===this)closeAddPropModal()});
+document.getElementById('addPropLibModal').addEventListener('click',function(e){if(e.target===this)closeAddPropLibModal()});
+</script>
+</body>
+</html>

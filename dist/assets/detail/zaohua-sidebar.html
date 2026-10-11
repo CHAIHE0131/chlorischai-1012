@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>造化工坊 · 左侧导航悬停名称</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #2c2c2c;
+    color: #fff;
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .logo {
+    position: fixed; top: 22px; left: 22px; z-index: 5;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 22px; font-weight: 700; letter-spacing: .5px;
+  }
+  .logo img { width: 28px; height: 28px; }
+  .hero {
+    position: relative; z-index: 1;
+    max-width: 920px; margin: 78px auto 0; padding: 0 80px 0 96px;
+    text-align: right;
+  }
+  .slogan { margin: 0 8px 18px; font-size: 28px; font-weight: 700; }
+  .slogan em { font-style: normal; color: #ff9c2a; }
+  .composer {
+    text-align: left;
+    background: #3a3a3a; border-radius: 16px; padding: 18px 18px 12px;
+    color: #bdbdbd; min-height: 92px;
+  }
+  .mode { margin-top: 18px; color: #eee; font-size: 13px; }
+  .chips { display: flex; justify-content: flex-end; gap: 10px; margin: 22px 0 28px; flex-wrap: wrap; }
+  .chip {
+    background: #3a3a3a; color: #eee; border-radius: 999px;
+    padding: 8px 14px; font-size: 13px;
+  }
+  .feed { position: relative; z-index: 1; padding: 0 36px 48px 88px; }
+  .tabs { display: flex; gap: 8px; margin: 0 0 16px; }
+  .tab {
+    border: 0; background: transparent; color: #cfcfcf;
+    border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer;
+  }
+  .tab.on { background: #4a4a4a; color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .card { min-width: 0; }
+  .card img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 10px; display: block; background: #222; }
+  .card .t { margin: 8px 0 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .m { margin: 2px 0 0; color: #9a9a9a; font-size: 12px; }
+
+  .rail {
+    position: fixed; z-index: 20; left: 16px; top: 0; bottom: 0; width: 36px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .group { display: flex; flex-direction: column; gap: 14px; }
+  .bottom { position: absolute; left: 0; bottom: 24px; display: flex; flex-direction: column; gap: 18px; }
+  .item {
+    position: relative; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 10px;
+    background: transparent; color: #fff; cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .item svg { width: 20px; height: 20px; display: block; fill: currentColor; }
+  .item:hover, .item:focus-visible { background: #454545; }
+  .item.active { color: #ff9c2a; }
+  .item.active:hover, .item.active:focus-visible { background: #454545; }
+  .dot {
+    position: absolute; top: 6px; right: 6px; width: 6px; height: 6px;
+    border-radius: 50%; background: #ff6a1a; pointer-events: none;
+  }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%; display: block;
+    background:
+      radial-gradient(circle at 50% 38%, #f3d2c4 0 7px, transparent 8px),
+      radial-gradient(circle at 50% 78%, #d7c4b8 0 12px, transparent 13px),
+      #6d625c;
+  }
+  .tip {
+    position: absolute; left: calc(100% + 10px); top: 50%;
+    transform: translateY(-50%);
+    background: #1c1c1c; color: #fff; border: 1px solid rgba(255,255,255,.12);
+    border-radius: 6px; padding: 4px 10px; font-size: 13px; line-height: 18px;
+    white-space: nowrap; pointer-events: none;
+    opacity: 0; visibility: hidden;
+  }
+  .item:hover .tip, .item:focus-visible .tip { opacity: 1; visibility: visible; }
+  .item:focus-visible { outline: 1px solid rgba(255,156,42,.8); outline-offset: 2px; }
+  .note {
+    position: fixed; right: 16px; bottom: 12px; z-index: 5;
+    color: rgba(255,255,255,.45); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+  <div class="logo">
+    <img src="https://www.zaohuacdn.com/web/production.zaohuacdn.com/cn/images/logo-sidebar.svg" alt="">
+    造化工坊
+  </div>
+
+  <nav class="rail" aria-label="主导航">
+    <div class="group" id="mainNav">
+      <button class="item active" type="button" data-key="home" aria-label="首页">
+        <svg viewBox="0 0 16 16"><path d="M6.66733 14.6668V9.96094H9.33399V14.6668H12.6673V8.39232H14.6673L8.00066 1.3335L1.33398 8.39232H3.33398V14.6668L6.66733 14.6668Z"/></svg>
+        <span class="tip">首页</span>
+      </button>
+      <button class="item" type="button" data-key="games" aria-label="游戏库">
+        <svg viewBox="3 49.5 18 14"><path d="M19.1718 51H4.88281L3.5 62.3333H8.71258L9.4808 60.0667H14.5192L15.2874 62.3333H20.5L19.1718 51ZM11.2318 55.0044V56.5156H9.69532V58.0267H8.15887V56.5156L6.62242 56.5156V55.0044H8.15887V53.4933H9.69532V55.0044L11.2318 55.0044ZM15.0729 53.4933H16.6124V55.0074H15.0729V53.4933ZM16.6124 56.5126V58.0267H15.0729V56.5126H16.6124Z"/></svg>
+        <span class="tip">游戏库</span>
+      </button>
+      <button class="item" type="button" data-key="activity" aria-label="活动">
+        <svg viewBox="-2 -2 16 16"><path d="M0.928458 0H0.273076C0.121177 0 0 0.122658 0 0.272572V11.7274C0 11.879 0.122884 12 0.273076 12H0.928458C1.08036 12 1.20153 11.8773 1.20153 11.7274V0.274276C1.20324 0.122657 1.08036 0 0.928458 0ZM11.7269 1.2845C8.5012 3.88245 5.27549 -1.79216 2.04807 0.804089C1.89788 0.925043 1.77499 1.16695 1.77499 1.31687V8.65758C1.77499 8.8092 1.89788 8.8109 2.04807 8.68995C5.27378 6.09199 8.5012 11.7683 11.7269 9.17036C11.8788 9.0494 12 8.8075 12 8.65758V1.31687C12.0017 1.16695 11.8788 1.16354 11.7269 1.2845Z"/></svg>
+        <span class="tip">活动</span>
+      </button>
+    </div>
+    <div class="bottom">
+      <button class="item" type="button" aria-label="通知">
+        <svg viewBox="0 0 24 24"><path d="M9.39 19.02C9.73 20.17 10.77 21 12 21s2.27-.83 2.61-1.98H9.39zM5 18.23h14v-2.37l-1.56-2.37V9.53C17.44 6.48 15.01 4 12 4S6.56 6.48 6.56 9.53v3.96L5 15.86v2.37z"/></svg>
+        <span class="dot"></span>
+        <span class="tip">通知</span>
+      </button>
+      <button class="item" type="button" aria-label="灵感">
+        <svg viewBox="0 0 24 24"><path d="M12 2.2l1.35 6.05L19.8 12l-6.45 1.75L12 21.8l-1.35-8.05L4.2 12l6.45-3.75z"/></svg>
+        <span class="tip">灵感</span>
+      </button>
+      <button class="item" type="button" aria-label="分享">
+        <svg viewBox="0 0 20 20"><path transform="translate(2, 4)" fill-rule="evenodd" d="M6 0C9.31 0 12 2.24 12 5c0 2.33-1.91 4.28-4.5 4.84.12.42.06.88.5 1.16-1.2 0-1.98-.49-2.45-1.02C2.45 9.79 0 7.63 0 5 0 2.24 2.69 0 6 0z"/><path transform="translate(10.45, 8.96)" fill-rule="evenodd" d="M4.54 0C5.86.57 6.77 1.76 6.77 3.14c0 1.85-1.65 3.37-3.73 3.49-.63.45-1.38.58-1.82.58.28-.18.45-.43.54-.69C1.09 6.37.49 6.07 0 5.66 1 5.34 1.9 4.83 2.62 4.17c.04 0 .09.02.14.02.39 0 .71-.32.71-.71 0-.07-.01-.14-.03-.2.7-.93 1.1-2.04 1.1-3.23z"/></svg>
+        <span class="tip">分享</span>
+      </button>
+      <button class="item" type="button" aria-label="我的">
+        <span class="avatar"></span>
+        <span class="tip">我的</span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <h1 class="slogan"><em>造化</em>随心， 一语成境</h1>
+    <div class="composer">
+      描述你的游戏灵感，创作0门槛…
+      <div class="mode">通用创作</div>
+    </div>
+    <div class="chips">
+      <span class="chip">Android APP</span>
+      <span class="chip">iOS APP</span>
+      <span class="chip">加入官方QQ群</span>
+      <span class="chip">参与官方赛事</span>
+    </div>
+  </header>
+
+  <main class="feed">
+    <div class="tabs">
+      <button class="tab on" type="button">互动影游</button>
+      <button class="tab" type="button">大家在玩</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </main>
+  <p class="note">示意：鼠标悬停左侧图标，显示对应名称。页面其余操作不变。</p>
+<script>
+  const cards = [
+    ["咸鱼：重生女帝","@灯竿","https://www.zaohuacdn.com/games/019e4fc2-f8a3-7008-9f67-6a0cfeabb9ea/media/cover_1779454806_0.png?imageMogr2/thumbnail/320x/format/webp/quality/85"],
+    ["《长生劫：淇河疑冢》","@虎老大王","https://www.zaohuacdn.com/kino/6a288430-0499-4479-9540-eef92d8501c5/1786542628850-6dceb4b5-8ca1-4472-add1-16ea3deadabe-generated.png?imageMogr2/thumbnail/320x/format/webp/quality/85"],
+    ["考试前一晚被美女包围","@1971","https://www.zaohuacdn.com/games/019e4fc1-3077-703d-a8f6-d1c6f08b6a25/media/cover_1779782043_0.png?imageMogr2/thumbnail/320x/format/webp/quality/85"],
+    ["《你背后那扇门》","@虎老大王","https://www.zaohuacdn.com/kino/6a288430-0499-4479-9540-eef92d8501c5/1785162294303-5f080b04-9577-4b76-b7b9-b4a3b4c3f06d-generated.png?imageMogr2/thumbnail/320x/format/webp/quality/85"],
+    ["《王小伟奇遇记》之神奇口袋","@虎老大王","https://www.zaohuacdn.com/kino/6a288430-0499-4479-9540-eef92d8501c5/1788239737736-2f4a22b6-5755-40b9-9095-33599c270443-generated.png?imageMogr2/thumbnail/320x/format/webp/quality/85"],
+    ["《红线劫》","@虎老大王","https://www.zaohuacdn.com/kino/6a288430-0499-4479-9540-eef92d8501c5/1783317073248-6c0b9e02-149a-4a04-84f4-543b97236294-generated.png?imageMogr2/thumbnail/320x/format/webp/quality/85"],
+    ["泣","@章鱼","https://www.zaohuacdn.com/games/019e4fc2-f8a3-7008-9f67-6a0cfeabb9ea/media/cover_1779454806_0.png?imageMogr2/thumbnail/320x/format/webp/quality/85"],
+    ["十三机兵防卫圈：循环的尽头","@虎老大王","https://www.zaohuacdn.com/kino/6a288430-0499-4479-9540-eef92d8501c5/1786542628850-6dceb4b5-8ca1-4472-add1-16ea3deadabe-generated.png?imageMogr2/thumbnail/320x/format/webp/quality/85"]
+  ];
+  document.getElementById("grid").innerHTML = cards.map(([t,a,src]) =>
+    `<article class="card"><img src="${src}" alt=""><p class="t">${t}</p><p class="m">PC / 移动端 ${a}</p></article>`
+  ).join("");
+
+  document.getElementById("mainNav").addEventListener("click", (e) => {
+    const btn = e.target.closest(".item");
+    if (!btn) return;
+    document.querySelectorAll("#mainNav .item").forEach((el) => el.classList.toggle("active", el === btn));
+  });
+  document.querySelector(".tabs").addEventListener("click", (e) => {
+    const tab = e.target.closest(".tab");
+    if (!tab) return;
+    document.querySelectorAll(".tab").forEach((el) => el.classList.toggle("on", el === tab));
+  });
+</script>
+</body>
+</html>

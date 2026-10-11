@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>泡漫 · 用户反馈流程图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;background:linear-gradient(135deg,#0f0c29,#1a1a3e,#24243e);min-height:100vh;color:#e0e0e0;padding:40px 20px;}
+h1{text-align:center;font-size:28px;font-weight:700;background:linear-gradient(90deg,#a78bfa,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.subtitle{text-align:center;font-size:14px;color:#9ca3af;margin-bottom:48px;}
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;max-width:1100px;margin:0 auto;}
+
+/* Nodes */
+.node{position:relative;padding:14px 28px;border-radius:14px;font-size:14px;font-weight:500;text-align:center;min-width:180px;max-width:320px;z-index:1;}
+.node-start{background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border-radius:28px;padding:12px 36px;box-shadow:0 4px 20px rgba(99,102,241,0.4);}
+.node-end{background:linear-gradient(135deg,#059669,#34d399);color:#fff;border-radius:28px;padding:12px 36px;box-shadow:0 4px 20px rgba(52,211,153,0.3);}
+.node-action{background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);color:#e5e7eb;}
+.node-decision{background:rgba(251,191,36,0.1);border:1.5px solid rgba(251,191,36,0.3);color:#fbbf24;transform:rotate(0deg);padding:14px 24px;}
+.node-decision::before{content:'';position:absolute;inset:-1px;border-radius:14px;border:1.5px solid rgba(251,191,36,0.3);transform:rotate(0deg);}
+.node-input{background:rgba(96,165,250,0.1);border:1.5px solid rgba(96,165,250,0.3);color:#93c5fd;}
+.node-process{background:rgba(167,139,250,0.1);border:1.5px solid rgba(167,139,250,0.3);color:#c4b5fd;}
+.node-error{background:rgba(239,68,68,0.1);border:1.5px solid rgba(239,68,68,0.3);color:#fca5a5;font-size:12px;padding:10px 18px;min-width:auto;}
+
+/* Arrow */
+.arrow{width:2px;height:32px;background:rgba(255,255,255,0.15);position:relative;}
+.arrow::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid rgba(255,255,255,0.25);}
+.arrow-short{height:20px;}
+
+/* Row for branches */
+.branch-row{display:flex;align-items:flex-start;justify-content:center;gap:24px;flex-wrap:wrap;width:100%;}
+.branch{display:flex;flex-direction:column;align-items:center;gap:0;}
+.branch-label{font-size:11px;color:#9ca3af;margin-bottom:6px;letter-spacing:1px;}
+
+/* Section title */
+.section-divider{display:flex;align-items:center;gap:12px;width:100%;max-width:800px;margin:20px 0 12px;}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08);}
+.section-divider span{font-size:12px;color:#6b7280;white-space:nowrap;letter-spacing:2px;}
+
+/* Sub-items */
+.sub-items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px;max-width:600px;}
+.sub-item{padding:6px 14px;border-radius:20px;font-size:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#9ca3af;}
+
+/* Parallel box */
+.parallel-box{display:flex;flex-direction:column;align-items:center;gap:0;padding:20px 28px;border:1.5px dashed rgba(255,255,255,0.08);border-radius:16px;background:rgba(255,255,255,0.02);margin:4px 0;}
+.parallel-label{font-size:11px;color:#6b7280;margin-bottom:10px;letter-spacing:1px;}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:48px;padding:20px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#9ca3af;}
+.legend-dot{width:14px;height:14px;border-radius:4px;}
+
+/* Horizontal connector for branches */
+.h-connector{display:flex;align-items:flex-start;position:relative;width:100%;}
+.h-line{position:absolute;top:0;left:50%;transform:translateX(-50%);height:2px;background:rgba(255,255,255,0.1);}
+</style>
+</head>
+<body>
+
+<h1>泡漫 · 用户反馈流程图</h1>
+<p class="subtitle">基于泡漫产品「问题反馈」模块的完整用户操作流程</p>
+
+<div class="flow">
+
+  <!-- 入口 -->
+  <div class="node node-start">用户进入泡漫主页</div>
+  <div class="arrow"></div>
+
+  <div class="node node-action">点击左侧边栏头像</div>
+  <div class="arrow"></div>
+
+  <div class="node node-action">弹出个人菜单</div>
+  <div class="arrow"></div>
+
+  <div class="node node-action" style="border-color:rgba(99,102,241,0.4);background:rgba(99,102,241,0.1);color:#a5b4fc;">点击「帮助与反馈」</div>
+  <div class="arrow"></div>
+
+  <div class="node node-process">进入反馈页面（全屏覆盖）</div>
+
+  <div class="section-divider"><span>顶部工具栏操作（可选）</span></div>
+
+  <div class="branch-row">
+    <div class="branch">
+      <div class="branch-label">操作 A</div>
+      <div class="node node-action" style="font-size:13px;">查看提交记录</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;padding:10px 16px;">侧滑面板展示历史反馈<br><span style="color:#6b7280;font-size:11px;">状态：待处理 / 处理中 / 已解决</span></div>
+    </div>
+    <div class="branch">
+      <div class="branch-label">操作 B</div>
+      <div class="node node-action" style="font-size:13px;">分享反馈页</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;padding:10px 16px;">二维码弹窗 / 复制链接</div>
+    </div>
+    <div class="branch">
+      <div class="branch-label">操作 C</div>
+      <div class="node node-action" style="font-size:13px;">个人菜单</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;padding:10px 16px;">切换账号 / 退出登录</div>
+    </div>
+    <div class="branch">
+      <div class="branch-label">操作 D</div>
+      <div class="node node-action" style="font-size:13px;">返回主页</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;padding:10px 16px;">关闭反馈页，回到主页</div>
+    </div>
+  </div>
+
+  <div class="section-divider"><span>反馈表单填写流程（核心）</span></div>
+
+  <!-- Step 1: 选择问题类型 -->
+  <div class="node node-decision">Step 1 · 选择问题类型（必填）</div>
+  <div class="arrow"></div>
+
+  <div class="branch-row">
+    <div class="branch">
+      <div class="branch-label">类型 A</div>
+      <div class="node node-input" style="font-size:13px;">报错反馈 / 建议</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-decision" style="font-size:12px;padding:10px 18px;">Step 2 · 选择制作环节（必填）</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;">
+        <div class="sub-item">智能分段</div>
+        <div class="sub-item">资产确认</div>
+        <div class="sub-item">分镜编辑</div>
+        <div class="sub-item">视频剪辑</div>
+      </div>
+      <div class="arrow arrow-short" style="margin-top:10px;"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;padding:10px 16px;">展开该环节的常见问题列表<br><span style="color:#6b7280;font-size:11px;">可多选勾选具体问题</span></div>
+    </div>
+    <div class="branch">
+      <div class="branch-label">类型 B</div>
+      <div class="node node-input" style="font-size:13px;">付款问题</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;color:#6b7280;">直接进入描述填写</div>
+    </div>
+    <div class="branch">
+      <div class="branch-label">类型 C</div>
+      <div class="node node-input" style="font-size:13px;">抽卡效果反馈</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-process" style="font-size:12px;padding:10px 16px;">展开星级评价模块</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;">
+        <div class="sub-item">画面质量 ★</div>
+        <div class="sub-item">动态效果 ★</div>
+        <div class="sub-item">风格一致性 ★</div>
+        <div class="sub-item">角色还原度 ★</div>
+      </div>
+    </div>
+    <div class="branch">
+      <div class="branch-label">类型 D</div>
+      <div class="node node-input" style="font-size:13px;">其他</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;color:#6b7280;">直接进入描述填写</div>
+    </div>
+  </div>
+
+  <div class="arrow" style="margin-top:16px;"></div>
+
+  <!-- Step 3: 问题描述 -->
+  <div class="node node-decision">Step 3 · 填写问题描述（必填）</div>
+  <div class="arrow"></div>
+
+  <div class="parallel-box">
+    <div class="parallel-label">以下为选填项，可同时完成</div>
+    <div class="branch-row" style="gap:20px;">
+      <div class="branch">
+        <div class="node node-input" style="font-size:13px;">上传问题截图</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:6px;">最多4张 · jpg/png</div>
+      </div>
+      <div class="branch">
+        <div class="node node-input" style="font-size:13px;">填写联系方式</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:6px;">微信 / 手机 / 邮箱</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- 提交 -->
+  <div class="node node-action" style="background:linear-gradient(135deg,#7c3aed,#6366f1,#3b82f6);color:#fff;border:none;box-shadow:0 4px 20px rgba(99,102,241,0.3);font-size:15px;font-weight:600;">点击「提交反馈」</div>
+  <div class="arrow"></div>
+
+  <!-- 校验 -->
+  <div class="node node-decision">表单校验</div>
+  <div class="arrow"></div>
+
+  <div class="branch-row" style="gap:40px;">
+    <div class="branch">
+      <div class="branch-label" style="color:#f87171;">校验失败</div>
+      <div class="node node-error">弹出提示<br>（未选类型 / 未选环节 / 未填描述）</div>
+      <div class="arrow arrow-short"></div>
+      <div class="node node-action" style="font-size:12px;min-width:auto;">返回表单继续填写</div>
+    </div>
+    <div class="branch">
+      <div class="branch-label" style="color:#34d399;">校验通过</div>
+      <div class="node node-action" style="background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.3);color:#6ee7b7;font-size:13px;">保存记录至本地<br>重置表单<br>显示成功提示</div>
+    </div>
+  </div>
+
+  <div class="arrow" style="margin-top:16px;"></div>
+  <div class="node node-end">反馈完成</div>
+
+</div>
+
+<!-- 图例 -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#7c3aed,#6366f1);"></div>起始 / 结束</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);"></div>操作步骤</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(251,191,36,0.1);border:1.5px solid rgba(251,191,36,0.3);"></div>判断 / 必填项</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(96,165,250,0.1);border:1.5px solid rgba(96,165,250,0.3);"></div>用户输入</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(167,139,250,0.1);border:1.5px solid rgba(167,139,250,0.3);"></div>系统处理</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.1);border:1.5px solid rgba(239,68,68,0.3);"></div>异常 / 报错</div>
+</div>
+
+<p style="text-align:center;font-size:12px;color:#4b5563;margin-top:32px;">泡漫产品团队 · 用户反馈流程梳理 · 2026.04.17</p>
+
+</body>
+</html>

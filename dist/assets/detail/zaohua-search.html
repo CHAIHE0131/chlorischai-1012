@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>【造化】游戏内容页 · 顶部常驻搜索</title>
+<style>
+  :root{
+    --bg:#121212;
+    --line:rgba(255,255,255,.10);
+    --line2:rgba(255,255,255,.16);
+    --ink:#fff;
+    --dim:rgba(255,255,255,.80);
+    --faint:rgba(255,255,255,.40);
+    --chip:#2a2a2a;
+    --orange:#FF9C2A;
+    --rail:56px;
+    --top:72px;
+    --field-h:36px;
+    --content:1180px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink)}
+  body{
+    font:14px/1.5 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;overflow:hidden;
+  }
+  button{font:inherit;color:inherit}
+  button,input{outline:none}
+
+  .rail{
+    position:fixed;left:0;top:0;bottom:0;width:var(--rail);z-index:80;
+    display:flex;flex-direction:column;align-items:center;padding:18px 0 16px;
+    background:#0e0e0e;border-right:1px solid var(--line);
+  }
+  .rail-logo{
+    width:28px;height:28px;border-radius:50%;margin-bottom:16px;
+    background:radial-gradient(circle at 38% 32%,#ffd24a,#ff7a1a 58%,#c93a00);
+  }
+  .rail-ico{
+    width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+    color:var(--dim);margin-bottom:10px;
+  }
+  .rail-ico.on{background:rgba(255,156,42,.16);color:var(--orange)}
+  .rail-gap{flex:1}
+
+  /* 顶栏：图1整组（四 Tab + 搜索框）水平居中，发帖靠右 */
+  .top{
+    position:fixed;top:0;left:var(--rail);right:0;height:var(--top);z-index:90;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    padding:0 28px;
+    background:rgba(18,18,18,.94);
+    border-bottom:1px solid var(--line);
+    backdrop-filter:blur(16px);
+  }
+  .cluster{
+    display:flex;align-items:center;gap:28px;justify-content:center;
+  }
+  .tabs{display:flex;align-items:center;gap:32px;height:28px}
+  .tab{
+    border:0;background:none;padding:0;cursor:pointer;
+    font-size:20px;line-height:28px;font-weight:400;color:#fff;opacity:.8;
+  }
+  .tab.on{color:var(--orange);opacity:1}
+  .search-field{
+    display:flex;align-items:center;gap:8px;
+    width:248px;height:var(--field-h);
+    padding:0 12px;
+    border:1px solid transparent;border-radius:8px;
+    background:rgba(255,255,255,.10);
+    transition:width .2s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .search-field.open{
+    width:360px;
+    border-color:rgba(255,156,42,.45);
+    box-shadow:0 0 0 3px rgba(255,156,42,.12);
+  }
+  .search-field svg{flex-shrink:0;opacity:.85}
+  .search-field input{
+    flex:1;min-width:0;border:0;background:none;color:#fff;font-size:14px;padding:0;
+  }
+  .search-field input::placeholder{color:var(--faint)}
+  .search-clear{
+    display:none;width:18px;height:18px;border:0;border-radius:50%;
+    background:rgba(255,255,255,.18);color:#fff;cursor:pointer;padding:0;
+    align-items:center;justify-content:center;font-size:11px;
+  }
+  .search-field.has-text .search-clear{display:inline-flex}
+  .post{
+    justify-self:end;height:36px;padding:0 18px;border:0;border-radius:8px;
+    background:var(--orange);color:#1a1208;font-weight:600;cursor:pointer;
+  }
+
+  .page{
+    margin-left:var(--rail);height:100%;overflow:auto;
+    padding:calc(var(--top) + 16px) 32px 80px;
+  }
+  .page.hidden{display:none}
+  .inner{max-width:var(--content);margin:0 auto}
+
+  .lib-head{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(180deg,#121212 70%,rgba(18,18,18,.92) 100%);
+    padding:4px 0 10px;
+  }
+  .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .pill{
+    height:32px;padding:0 14px;border:0;border-radius:8px;cursor:pointer;
+    background:var(--chip);color:rgba(255,255,255,.82);font-size:14px;
+  }
+  .pill.on{background:var(--orange);color:#1a1208;font-weight:500}
+  .sort{margin-left:auto;height:32px;padding:0 12px;border:0;background:transparent;color:var(--dim);cursor:pointer}
+  .subfilters{display:flex;gap:8px;margin-top:8px}
+  .count{margin:8px 0 14px;font-size:16px;color:rgba(255,255,255,.88)}
+  .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  @media (max-width:1280px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media (max-width:1024px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .card{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#2a2a2a;cursor:pointer}
+  .card .art,.art{position:absolute;inset:0}
+  .card .name{position:absolute;left:10px;right:10px;bottom:10px;font-size:15px;font-weight:600;text-shadow:0 1px 8px #000}
+
+  /* 推荐 */
+  .subnav{display:flex;align-items:center;gap:16px;margin-bottom:16px;font-size:20px}
+  .subnav button{border:0;background:none;padding:0;cursor:pointer;color:rgba(255,255,255,.8)}
+  .subnav button.on{color:var(--orange)}
+  .subnav .sep{width:1px;height:16px;background:rgba(255,255,255,.2)}
+  .banner{
+    position:relative;height:320px;border-radius:12px;overflow:hidden;margin-bottom:24px;
+  }
+  .banner .art{inset:0}
+  .banner .meta{
+    position:absolute;left:28px;right:28px;bottom:24px;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+  }
+  .banner h2{margin:0 0 8px;font-size:28px;font-weight:600}
+  .banner .who{color:var(--dim);margin-bottom:8px}
+  .banner .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .play{
+    height:36px;padding:0 18px;border:0;border-radius:8px;
+    background:var(--orange);color:#1a1208;font-weight:600;cursor:pointer;flex-shrink:0;
+  }
+  .sec-title{
+    display:flex;align-items:center;justify-content:space-between;
+    margin:8px 0 14px;font-size:20px;font-weight:400;
+  }
+  .link{border:0;background:none;color:var(--dim);cursor:pointer;font-size:14px}
+  .pick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:28px}
+  .pick{background:#1d1d1d;border-radius:10px;overflow:hidden;cursor:pointer}
+  .pick .cover{position:relative;aspect-ratio:16/9}
+  .pick .body{padding:10px 12px 12px}
+  .pick .t{margin:0 0 6px;font-size:14px;font-weight:500}
+  .pick .s{font-size:12px;color:var(--faint)}
+  .rank-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:28px}
+  .rank-card{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:16/10;cursor:pointer}
+  .rank-card .badge{
+    position:absolute;top:10px;left:10px;width:28px;height:28px;border-radius:8px;
+    background:var(--orange);color:#1a1208;font-weight:700;display:grid;place-items:center;
+  }
+  .rank-card .info{position:absolute;left:12px;right:12px;bottom:12px}
+  .all-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+
+  /* 社区 / 我的 Feed 卡 */
+  .feed{display:flex;flex-direction:column;gap:16px}
+  .post-card{
+    display:grid;grid-template-columns:280px 1fr auto;gap:16px;align-items:center;
+    background:#1a1a1a;border:1px solid var(--line);border-radius:12px;padding:14px;
+  }
+  .post-cover{position:relative;height:158px;border-radius:8px;overflow:hidden}
+  .post-title{margin:0 0 8px;font-size:18px;font-weight:500}
+  .post-who{display:flex;align-items:center;gap:8px;color:var(--dim);margin-bottom:8px;font-size:13px}
+  .ava{width:28px;height:28px;border-radius:50%;background:#3a3a3a;display:grid;place-items:center;font-size:12px}
+  .post-stats{color:var(--faint);font-size:13px;margin-bottom:8px}
+  .post-intro{color:var(--dim);font-size:13px;margin:0 0 10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tag{height:22px;padding:0 8px;border-radius:4px;background:rgba(255,255,255,.08);font-size:12px;color:var(--dim);display:inline-flex;align-items:center}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+
+  .my-head{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+  .my-ava{width:56px;height:56px;border-radius:50%;background:#3a3a3a;display:grid;place-items:center;font-size:20px}
+  .my-name{margin:0 0 4px;font-size:20px}
+  .my-sub{margin:0;color:var(--faint);font-size:13px}
+
+  .mask{display:none;position:fixed;inset:0;left:var(--rail);top:var(--top);z-index:70;background:rgba(0,0,0,.28)}
+  .mask.show{display:block}
+  .pop{
+    display:none;position:fixed;z-index:95;top:62px;left:40%;
+    width:min(560px,calc(100vw - 24px));max-height:min(68vh,620px);overflow:auto;
+    background:#1d1d1d;border:1px solid var(--line2);border-radius:12px;
+    box-shadow:0 18px 48px rgba(0,0,0,.55);padding:20px 20px 18px;
+  }
+  .pop.show{display:block}
+  .sec{margin-bottom:22px}
+  .sec:last-child{margin-bottom:0}
+  .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:15px;font-weight:500}
+  .icon-btn{width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--dim);cursor:pointer;display:grid;place-items:center}
+  .icon-btn:hover{background:rgba(255,255,255,.08)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    height:30px;padding:0 14px;border:1px solid rgba(255,255,255,.18);border-radius:999px;
+    background:transparent;color:#fff;cursor:pointer;font-size:13px;
+  }
+  .hot{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+  .hot button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;cursor:pointer;color:#fff;text-align:left}
+  .hot .n{width:18px;font-weight:500}
+  .hot .n.top{color:var(--orange)}
+  .result-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .result-head .total{font-size:13px;color:var(--faint)}
+  .result-tabs{display:flex;gap:16px}
+  .result-tabs button{border:0;background:none;padding:0;cursor:pointer;color:var(--faint)}
+  .result-tabs button.on{color:var(--orange)}
+  .row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .cover{width:112px;height:63px;border-radius:6px;flex-shrink:0;overflow:hidden;position:relative}
+  .row-title{margin:0 0 4px;font-size:14px}
+  .row-title em{font-style:normal;color:var(--orange);font-weight:600}
+  .user-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .user{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,.04)}
+  .empty{padding:28px 8px;text-align:center;color:var(--faint)}
+  .result-page .result-head{margin-bottom:18px}
+  .result-page .row{padding:14px 0}
+  .result-page .cover{width:148px;height:84px}
+  .result-leave{
+    border:0;background:none;color:var(--dim);cursor:pointer;font-size:14px;padding:0;
+  }
+  .empty-actions{display:flex;gap:12px;justify-content:center;margin-top:12px}
+  .empty-actions button{
+    height:32px;padding:0 14px;border:0;border-radius:8px;cursor:pointer;
+    background:rgba(255,255,255,.08);color:#fff;
+  }
+  .note{
+    position:fixed;right:20px;bottom:20px;z-index:100;width:300px;
+    background:#1d1d1d;border:1px solid var(--line2);border-radius:10px;padding:12px 14px;
+    font-size:12px;line-height:1.65;color:var(--dim);
+  }
+  .note b{color:#fff}
+  .note .close-note{position:absolute;top:8px;right:8px;border:0;background:none;color:var(--faint);cursor:pointer}
+</style>
+</head>
+<body>
+
+<aside class="rail" aria-label="主导航">
+  <div class="rail-logo" title="造化工坊"></div>
+  <div class="rail-ico" title="首页"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"/></svg></div>
+  <div class="rail-ico on" title="游戏"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="10" rx="3"/><path d="M8 13h3M9.5 11.5v3M16 12h.01M18 14h.01"/></svg></div>
+  <div class="rail-ico" title="活动"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h10l2 16H8L6 4Z"/><path d="M9 8h8"/></svg></div>
+  <div class="rail-gap"></div>
+  <div class="rail-ico" title="帮助"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.3c-.8.4-1.1 1-1.1 1.7V14"/><circle cx="12" cy="17" r=".8" fill="currentColor" stroke="none"/></svg></div>
+</aside>
+
+<header class="top">
+  <div></div>
+  <div class="cluster">
+    <nav class="tabs" aria-label="内容页">
+      <button class="tab on" data-tab="recommend" type="button">推荐</button>
+      <button class="tab" data-tab="follow" type="button">社区</button>
+      <button class="tab" data-tab="categories" type="button">游戏库</button>
+      <button class="tab" data-tab="my" type="button">我的</button>
+    </nav>
+    <label class="search-field" id="searchField">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/></svg>
+      <input id="searchInput" type="text" maxlength="40" placeholder="搜索游戏、创作者" autocomplete="off" aria-label="搜索游戏、创作者">
+      <button class="search-clear" id="clearInput" type="button" aria-label="清空">×</button>
+    </label>
+  </div>
+  <button class="post" type="button">发帖</button>
+</header>
+
+<div class="mask" id="mask"></div>
+<div class="pop" id="pop" role="dialog" aria-label="搜索">
+  <div id="homePanel"></div>
+  <div id="resultPanel" hidden></div>
+</div>
+
+<main class="page" id="pageRecommend">
+  <div class="inner">
+    <div class="subnav">
+      <button class="on" type="button" id="btnReco">推荐</button>
+      <span class="sep"></span>
+      <button type="button" id="btnRank">排行榜</button>
+    </div>
+    <div id="recoFeed">
+      <section class="banner" id="banner"></section>
+      <div class="sec-title"><span>编辑精选</span></div>
+      <div class="pick-grid" id="picks"></div>
+      <div class="sec-title"><span>热玩榜</span><button class="link" type="button" data-open-rank="hot">查看排行榜 &gt;</button></div>
+      <div class="rank-grid" id="rankHot"></div>
+      <div class="sec-title"><span>新游榜</span><button class="link" type="button" data-open-rank="new">查看排行榜 &gt;</button></div>
+      <div class="rank-grid" id="rankNew"></div>
+      <div class="sec-title"><span>二创榜</span><button class="link" type="button" data-open-rank="modi">查看排行榜 &gt;</button></div>
+      <div class="rank-grid" id="rankModi"></div>
+      <div class="sec-title"><span>所有游戏</span><button class="link" type="button" id="toLib">查看全部 &gt;</button></div>
+      <div class="all-grid" id="allGames"></div>
+    </div>
+    <div id="recoRank" hidden>
+      <div class="rank-grid" id="rankFull"></div>
+    </div>
+  </div>
+</main>
+
+<main class="page hidden" id="pageFollow">
+  <div class="inner">
+    <div class="sec-title"><span>关注的人</span></div>
+    <div class="feed" id="followFeed"></div>
+  </div>
+</main>
+
+<main class="page hidden" id="pageCategories">
+  <div class="inner">
+    <div class="lib-head">
+      <div class="filters" id="filters"></div>
+      <div class="subfilters">
+        <button class="pill" type="button">MCP发布游戏</button>
+        <button class="pill" type="button">参赛作品</button>
+        <button class="pill" type="button">🏆 获奖作品</button>
+      </div>
+    </div>
+    <p class="count" id="countLabel">互动影游: 540 款游戏</p>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<main class="page hidden" id="pageSearch">
+  <div class="inner result-page">
+    <div class="result-head" style="margin-top:4px">
+      <button class="result-leave" type="button" id="leaveSearch">← 返回浏览</button>
+    </div>
+    <div id="fullResult"></div>
+  </div>
+</main>
+
+<main class="page hidden" id="pageMy">
+  <div class="inner">
+    <div class="my-head">
+      <div class="my-ava">荷</div>
+      <div>
+        <p class="my-name">柴荷</p>
+        <p class="my-sub">我发布的作品 · 可继续游玩或编辑</p>
+      </div>
+    </div>
+    <div class="feed" id="myFeed"></div>
+  </div>
+</main>
+
+<aside class="note" id="note">
+  <button class="close-note" type="button" id="closeNote">×</button>
+  <b>这版怎么验</b><br>
+  <b>新方案怎么验</b><br>
+  点搜索框：只出历史 / 发现 / 热搜。<br>
+  回车或点「倒带」：关掉小窗，进入全宽结果页，可往下翻。<br>
+  Esc / 清空 / 点「推荐」：回到刚才的浏览位置。
+</aside>
+
+<script>
+(function () {
+  const CATS = ["互动影游","角色扮演","策略","射击","动作","模拟","卡牌","休闲益智","体育","竞速","音乐","Roguelike","沙盒","多人","文字叙事"];
+  const SEED = [
+    ["今夜无人下班","#3a2a22"],["终极一战","#1d2a3a"],["小猫奇遇记","#2a2438"],
+    ["完美犯罪","#2c1f1a"],["女配手撕剧本后","#3a2430"],["第59分钟","#1a2c28"],
+    ["枫华鸟·代码破局","#243044"],["逆时战警","#2a2018"],["带着炒鱿鱼的猫","#33281c"],
+    ["倒霉一生","#2c2430"],["夜巡者","#1c2430"],["剧场迷踪","#302028"],
+    ["少女前线夜","#241c28"],["今夜不打烊","#2a2218"],["倒带","#3a2c1c"],
+    ["聆罪录","#2a1c24"],["西融杯参赛作","#1c2830"],["未解谜案","#241c1c"]
+  ];
+  const COLORS = ["#3a2a22","#1d2a3a","#2a2438","#2c1f1a","#3a2430","#1a2c28","#243044","#2a2018","#33281c","#2c2430"];
+  const SUFFIX = ["","·番外","：午夜档","重制","试玩版","第二章"];
+  const GAMES = [];
+  for (let i = 0; i < 80; i += 1) {
+    const seed = SEED[i % SEED.length];
+    const suffix = SUFFIX[Math.floor(i / SEED.length) % SUFFIX.length];
+    GAMES.push([i < SEED.length ? seed[0] : seed[0] + suffix, COLORS[i % COLORS.length]]);
+  }
+  const PICKS = SEED.slice(0, 4);
+  const HOT_RANK = SEED.slice(0, 3);
+  const NEW_RANK = SEED.slice(3, 6);
+  const MODI_RANK = SEED.slice(6, 9);
+  const POSTS = [
+    {title:"女配手撕剧本后", author:"北巷", plays:"12.4万", likes:"3280", tags:["PC / 移动端","互动影游","活动"], intro:"女配觉醒后改写原著结局，分支通向三个完全不同的终章。", color:"#3a2430"},
+    {title:"倒带", author:"林深", plays:"8.1万", likes:"2104", tags:["PC 端","互动影游","悬疑"], intro:"同一段午夜档被反复倒回，每次选择都会改写谁活下来。", color:"#3a2c1c"},
+    {title:"逆时战警", author:"星野", plays:"5.6万", likes:"1560", tags:["PC 端","互动影游"], intro:"时间罪案课用倒流证据抓捕尚未发生的犯罪。", color:"#2a2018"},
+    {title:"第59分钟", author:"阿茶", plays:"3.2万", likes:"890", tags:["移动端","互动影游"], intro:"比赛还剩一分钟，解说、球员和看台各自藏着另一条线。", color:"#1a2c28"},
+    {title:"未解谜案", author:"七月", plays:"2.8万", likes:"640", tags:["PC 端","解谜","大赛"], intro:"创作者大赛命题作，现场留下的只有一盘录影带。", color:"#241c1c"}
+  ];
+  const MY = [
+    {title:"今夜无人下班", author:"柴荷", plays:"128", likes:"36", tags:["PC 端","互动影游","已发布"], intro:"加班夜的办公室里，电梯每次停下都通向不同楼层。", color:"#3a2a22"},
+    {title:"剧场迷踪·草稿", author:"柴荷", plays:"0", likes:"0", tags:["草稿","文字叙事"], intro:"还没发布，仅自己可见。", color:"#302028"}
+  ];
+  const DISCOVERY_POOL = [
+    ["倒带","逆时战警","倒霉一生","第59分钟","枫华鸟·代码破局","带着炒鱿鱼的猫"],
+    ["今夜无人下班","互动影游","夜巡者","剧场迷踪","五子棋","少女前线夜"]
+  ];
+  const HOT = ["倒带","五子棋","夜巡者","剧场","少女","今夜","逆时战警","互动影游"];
+  const RESULT_GAMES = {
+    "倒带": [
+      {title:"倒带", tags:["PC 端","互动影游","悬疑"], author:"林深", time:"3天前"},
+      {title:"倒带：午夜档", tags:["PC / 移动端","互动影游"], author:"北巷", time:"1周前"},
+      {title:"倒带事务所", tags:["PC 端","解谜"], author:"阿茶", time:"2周前"},
+      {title:"时间倒带局", tags:["移动端","策略"], author:"七月", time:"1个月前"},
+      {title:"请倒带重来", tags:["PC 端","文字叙事"], author:"木木", time:"2个月前"},
+      {title:"倒带放映厅", tags:["PC 端","互动影游"], author:"西楼", time:"3个月前"},
+      {title:"倒带练习生", tags:["PC / 移动端","休闲益智"], author:"阿茶", time:"3个月前"},
+      {title:"倒带夜话", tags:["移动端","互动影游"], author:"北巷", time:"4个月前"},
+      {title:"倒带与重播", tags:["PC 端","解谜"], author:"林深", time:"5个月前"},
+      {title:"最后一次倒带", tags:["PC 端","互动影游"], author:"星野", time:"半年前"}
+    ],
+    "逆时战警": [
+      {title:"逆时战警", tags:["PC 端","互动影游"], author:"星野", time:"5天前"},
+      {title:"逆时战警·番外", tags:["PC 端","互动影游"], author:"星野", time:"3周前"}
+    ]
+  };
+  const RESULT_USERS = {
+    "倒带": [{name:"倒带工作室", fans:"1.2万"}, {name:"倒带玩家日报", fans:"860"}]
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const pages = {
+    recommend: $("pageRecommend"),
+    follow: $("pageFollow"),
+    categories: $("pageCategories"),
+    my: $("pageMy"),
+    search: $("pageSearch")
+  };
+  const searchField = $("searchField");
+  const searchInput = $("searchInput");
+  const pop = $("pop");
+  const mask = $("mask");
+  const homePanel = $("homePanel");
+  const resultPanel = $("resultPanel");
+
+  let recent = ["倒带","逆时战警"];
+  let discoveryIdx = 0;
+  let resultTab = "all";
+  let keyword = "";
+  let searchOpen = false;
+  let activeTab = "recommend";
+  let prevTab = "recommend";
+  let inFullResult = false;
+
+  function artStyle(color) {
+    return "background:radial-gradient(120% 80% at 20% 10%,rgba(255,255,255,.18),transparent 42%),linear-gradient(135deg," + color + ",#111);";
+  }
+  function cardHtml(title, color) {
+    return '<article class="card"><div class="art" style="' + artStyle(color) + '"></div><div class="name">' + title + "</div></article>";
+  }
+  function postHtml(item) {
+    return '<article class="post-card"><div class="post-cover"><div class="art" style="' + artStyle(item.color) + '"></div></div>' +
+      '<div><h3 class="post-title">' + item.title + '</h3><div class="post-who"><span class="ava">' + item.author.slice(0,1) + "</span>" + item.author +
+      '</div><div class="post-stats">游玩 ' + item.plays + " · 点赞 " + item.likes + '</div><p class="post-intro">' + item.intro +
+      '</p><div class="tags">' + item.tags.map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("") +
+      "</div></div><button class=\"play\" type=\"button\">游玩</button></article>";
+  }
+
+  function renderRecommend() {
+    $("banner").innerHTML =
+      '<div class="art" style="' + artStyle("#3a2430") + '"></div><div class="meta"><div>' +
+      "<h2>女配手撕剧本后</h2><div class=\"who\">北巷 · 2天前发布</div><div class=\"tags\">" +
+      '<span class="tag">PC / 移动端</span><span class="tag">互动影游</span></div></div>' +
+      '<button class="play" type="button">游玩</button></div>';
+    $("picks").innerHTML = PICKS.map(function (g) {
+      return '<article class="pick"><div class="cover"><div class="art" style="' + artStyle(g[1]) + '"></div></div>' +
+        '<div class="body"><p class="t">' + g[0] + '</p><div class="s">编辑精选 · 创作者</div></div></article>';
+    }).join("");
+    function fillRank(id, list) {
+      $(id).innerHTML = list.map(function (g, i) {
+        return '<article class="rank-card"><div class="art" style="' + artStyle(g[1]) + '"></div>' +
+          '<div class="badge">' + (i + 1) + '</div><div class="info"><div>' + g[0] + "</div></div></article>";
+      }).join("");
+    }
+    fillRank("rankHot", HOT_RANK);
+    fillRank("rankNew", NEW_RANK);
+    fillRank("rankModi", MODI_RANK);
+    $("allGames").innerHTML = GAMES.slice(0, 15).map(function (g) { return cardHtml(g[0], g[1]); }).join("");
+    $("rankFull").innerHTML = SEED.map(function (g, i) {
+      return '<article class="rank-card"><div class="art" style="' + artStyle(g[1]) + '"></div>' +
+        '<div class="badge">' + (i + 1) + '</div><div class="info"><div>' + g[0] + "</div></div></article>";
+    }).join("");
+  }
+
+  function renderFilters() {
+    $("filters").innerHTML = CATS.map(function (name, i) {
+      return '<button class="pill' + (i === 0 ? " on" : "") + '" type="button" data-cat="' + name + '">' + name + "</button>";
+    }).join("") + '<button class="sort" type="button">综合排序 ▾</button>';
+    $("filters").onclick = function (e) {
+      const btn = e.target.closest("[data-cat]");
+      if (!btn) return;
+      $("filters").querySelectorAll("[data-cat]").forEach(function (el) { el.classList.toggle("on", el === btn); });
+      $("countLabel").textContent = btn.dataset.cat + ": 540 款游戏";
+    };
+  }
+  function renderGrid() {
+    $("grid").innerHTML = GAMES.map(function (g) { return cardHtml(g[0], g[1]); }).join("");
+  }
+  function renderFeeds() {
+    $("followFeed").innerHTML = POSTS.map(postHtml).join("");
+    $("myFeed").innerHTML = MY.map(postHtml).join("");
+  }
+
+  function showPage(key) {
+    if (key !== "search") {
+      inFullResult = false;
+      closeSearch();
+      prevTab = key;
+    }
+    activeTab = key;
+    Object.keys(pages).forEach(function (k) { pages[k].classList.toggle("hidden", k !== key); });
+    document.querySelectorAll(".tab").forEach(function (el) {
+      el.classList.toggle("on", key === "search" ? el.dataset.tab === prevTab : el.dataset.tab === key);
+    });
+    if (searchOpen) placePop();
+  }
+
+  function leaveFullResult() {
+    keyword = "";
+    searchInput.value = "";
+    searchField.classList.remove("has-text");
+    inFullResult = false;
+    closeSearch();
+    showPage(prevTab);
+  }
+
+  function highlight(text, kw) {
+    if (!kw) return text;
+    const i = text.toLowerCase().indexOf(kw.toLowerCase());
+    if (i < 0) return text;
+    return text.slice(0, i) + "<em>" + text.slice(i, i + kw.length) + "</em>" + text.slice(i + kw.length);
+  }
+  function renderHome() {
+    const chips = DISCOVERY_POOL[discoveryIdx % DISCOVERY_POOL.length];
+    homePanel.hidden = false;
+    if (resultPanel) resultPanel.hidden = true;
+    homePanel.innerHTML =
+      (recent.length ? '<section class="sec"><div class="sec-h"><span>历史搜索</span><button class="icon-btn" type="button" id="clearRecent">✕</button></div><div class="chips">' +
+        recent.map(function (t) { return '<button class="chip" type="button" data-src="history" data-term="' + t + '">' + t + "</button>"; }).join("") + "</div></section>" : "") +
+      '<section class="sec"><div class="sec-h"><span>搜索发现</span><button class="icon-btn" type="button" id="refreshSuggest">↻</button></div><div class="chips">' +
+      chips.map(function (t, i) { return '<button class="chip" type="button" data-src="discovery" data-term="' + t + '">' + (i === 0 ? "🔥 " : "") + t + "</button>"; }).join("") +
+      "</div></section>" +
+      '<section class="sec"><div class="sec-h"><span>热门搜索</span></div><ol class="hot">' +
+      HOT.map(function (term, i) {
+        return "<li><button type=\"button\" data-src=\"hot\" data-term=\"" + term + "\"><span class=\"n" + (i < 3 ? " top" : "") + "\">" + (i + 1) + "</span><span>" + term + "</span></button></li>";
+      }).join("") + "</ol></section>";
+  }
+  function gamesFor(kw) {
+    if (RESULT_GAMES[kw]) return RESULT_GAMES[kw];
+    return GAMES.filter(function (g) { return g[0].indexOf(kw) >= 0; }).slice(0, 6).map(function (g) {
+      return {title:g[0], tags:["PC 端","互动影游"], author:"创作者", time:"近期"};
+    });
+  }
+  function renderResults() {
+    const games = gamesFor(keyword);
+    const users = RESULT_USERS[keyword] || [];
+    const preview = resultTab === "all";
+    const shownGames = resultTab === "users" ? [] : (preview ? games.slice(0, 5) : games);
+    const shownUsers = resultTab === "games" ? [] : (preview ? users.slice(0, 5) : users);
+    const total = resultTab === "users" ? users.length : resultTab === "games" ? games.length : games.length + users.length;
+    const gameRows = shownGames.map(function (g) {
+      return '<div class="row"><div class="cover"><div class="art" style="' + artStyle("#3a2c1c") + '"></div></div><div style="flex:1"><p class="row-title">' +
+        highlight(g.title, keyword) + '</p><div class="tags">' + g.tags.map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("") +
+        '</div><div style="color:var(--faint);font-size:12px;margin-top:6px">' + g.author + " · " + g.time + "发布</div></div><button class=\"play\" type=\"button\">游玩</button></div>";
+    }).join("");
+    const userCards = shownUsers.map(function (u) {
+      return '<div class="user"><div class="ava">' + u.name.slice(0,1) + "</div><div>" + highlight(u.name, keyword) + '<div style="color:var(--faint);font-size:12px">' + u.fans + " 粉丝</div></div></div>";
+    }).join("");
+    $("fullResult").innerHTML =
+      '<div class="result-head"><span class="total">共 ' + total + ' 个匹配的结果</span><div class="result-tabs">' +
+      '<button type="button" data-rtab="all"' + (resultTab === "all" ? ' class="on"' : "") + ">综合</button>" +
+      '<button type="button" data-rtab="games"' + (resultTab === "games" ? ' class="on"' : "") + ">游戏</button>" +
+      '<button type="button" data-rtab="users"' + (resultTab === "users" ? ' class="on"' : "") + ">用户</button></div></div>" +
+      (total === 0
+        ? '<div class="empty">没有找到“' + keyword + "”相关内容<div class=\"empty-actions\"><button type=\"button\" id=\"retryKw\">换个关键词试试</button><button type=\"button\" id=\"toHot\">查看热门游戏</button></div></div>"
+        : (gameRows ? "<div class=\"sec\">" + (preview && games.length ? '<div class="sec-h"><span>游戏</span>' + (games.length > 5 ? '<button class="link" type="button" data-rtab="games">查看全部结果</button>' : "") + "</div>" : "") + gameRows + "</div>" : "") +
+          (userCards ? '<div class="sec"><div class="sec-h"><span>用户</span></div><div class="user-grid">' + userCards + "</div></div>" : ""));
+  }
+  function remember(term) {
+    recent = [term].concat(recent.filter(function (t) { return t !== term; })).slice(0, 10);
+  }
+  function placePop() {
+    const rect = searchField.getBoundingClientRect();
+    const width = Math.min(560, window.innerWidth - 24);
+    let left = rect.left;
+    if (left + width > window.innerWidth - 12) left = window.innerWidth - width - 12;
+    if (left < 12) left = 12;
+    pop.style.top = Math.round(rect.bottom + 8) + "px";
+    pop.style.left = Math.round(left) + "px";
+    pop.style.width = width + "px";
+  }
+  function openSearch() {
+    if (inFullResult) {
+      searchField.classList.add("open");
+      return;
+    }
+    searchOpen = true;
+    searchField.classList.add("open");
+    mask.classList.add("show");
+    pop.classList.add("show");
+    placePop();
+    renderHome();
+    searchInput.focus();
+  }
+  function closeSearch() {
+    searchOpen = false;
+    searchField.classList.remove("open");
+    mask.classList.remove("show");
+    pop.classList.remove("show");
+  }
+  function submit(term) {
+    const t = (term || "").trim();
+    if (!t) return;
+    keyword = t;
+    searchInput.value = t;
+    searchField.classList.add("has-text");
+    remember(t);
+    resultTab = "all";
+    closeSearch();
+    searchField.classList.add("open");
+    searchField.classList.add("has-text");
+    inFullResult = true;
+    if (activeTab !== "search") prevTab = activeTab;
+    showPage("search");
+    renderResults();
+  }
+  function activePage() { return pages[inFullResult ? "search" : activeTab]; }
+
+  searchInput.addEventListener("focus", openSearch);
+  searchInput.addEventListener("input", function () {
+    searchField.classList.toggle("has-text", searchInput.value.length > 0);
+    if (!searchInput.value) {
+      keyword = "";
+      if (inFullResult) leaveFullResult();
+      else renderHome();
+    }
+  });
+  searchInput.addEventListener("keydown", function (e) {
+    if (e.isComposing) return;
+    if (e.key === "Enter") submit(searchInput.value);
+    if (e.key === "Escape") {
+      if (inFullResult) leaveFullResult();
+      else closeSearch();
+    }
+  });
+  $("clearInput").addEventListener("click", function (e) {
+    e.preventDefault();
+    searchInput.value = ""; keyword = "";
+    searchField.classList.remove("has-text");
+    if (inFullResult) leaveFullResult();
+    else { renderHome(); searchInput.focus(); }
+  });
+  mask.addEventListener("click", closeSearch);
+  mask.addEventListener("wheel", function (e) { activePage().scrollTop += e.deltaY; }, { passive: true });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSearch(); });
+  pop.addEventListener("click", function (e) {
+    const termBtn = e.target.closest("[data-term]");
+    if (termBtn) { submit(termBtn.dataset.term); return; }
+    if (e.target.id === "clearRecent") { recent = []; renderHome(); return; }
+    if (e.target.id === "refreshSuggest") { discoveryIdx += 1; renderHome(); return; }
+  });
+  $("pageSearch").addEventListener("click", function (e) {
+    const rtab = e.target.closest("[data-rtab]");
+    if (rtab) { resultTab = rtab.dataset.rtab; renderResults(); return; }
+    if (e.target.id === "toHot") { leaveFullResult(); showPage("recommend"); return; }
+    if (e.target.id === "retryKw") { searchInput.focus(); searchInput.select(); }
+  });
+  $("leaveSearch").addEventListener("click", leaveFullResult);
+  document.querySelectorAll(".tab").forEach(function (btn) {
+    btn.addEventListener("click", function () { showPage(btn.dataset.tab); });
+  });
+  $("btnReco").addEventListener("click", function () {
+    $("btnReco").classList.add("on"); $("btnRank").classList.remove("on");
+    $("recoFeed").hidden = false; $("recoRank").hidden = true;
+  });
+  $("btnRank").addEventListener("click", function () {
+    $("btnRank").classList.add("on"); $("btnReco").classList.remove("on");
+    $("recoFeed").hidden = true; $("recoRank").hidden = false;
+  });
+  document.querySelectorAll("[data-open-rank]").forEach(function (btn) {
+    btn.addEventListener("click", function () { $("btnRank").click(); });
+  });
+  $("toLib").addEventListener("click", function () { showPage("categories"); });
+  $("closeNote").addEventListener("click", function () { $("note").remove(); });
+  window.addEventListener("resize", function () { if (searchOpen) placePop(); });
+  Object.keys(pages).forEach(function (k) {
+    pages[k].addEventListener("scroll", function () { if (searchOpen) placePop(); }, { passive: true });
+  });
+
+  renderRecommend();
+  renderFilters();
+  renderGrid();
+  renderFeeds();
+  renderHome();
+})();
+</script>
+</body>
+</html>
